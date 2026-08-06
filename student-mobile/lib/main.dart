@@ -46,7 +46,7 @@ class _SSGElectionAppState extends State<SSGElectionApp> {
     final base = GoogleFonts.plusJakartaSansTextTheme();
 
     return MaterialApp.router(
-      title: 'SSG Elections',
+      title: 'ACLC SSG Elections',
       debugShowCheckedModeBanner: false,
       color: AppColors.bg,
       theme: ThemeData(

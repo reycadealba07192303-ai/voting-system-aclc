@@ -4,9 +4,10 @@
     <!-- Allow cleartext HTTP to 10.0.2.2 (localhost via emulator) in debug -->
     <application
         android:usesCleartextTraffic="true"
-        android:label="student_mobile"
+        android:label="ACLC SSG Elections"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/aclc_logo"
+        android:roundIcon="@drawable/aclc_logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"

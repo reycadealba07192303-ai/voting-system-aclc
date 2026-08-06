@@ -179,9 +179,9 @@ export default function ElectionDetail() {
                     key={lv}
                     className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
                     style={{
-                      background: 'rgba(99,102,241,0.15)',
-                      border: '1px solid rgba(99,102,241,0.28)',
-                      color: '#a5b4fc',
+                      background: 'rgba(35,51,180,0.15)',
+                      border: '1px solid rgba(35,51,180,0.28)',
+                      color: '#93c5fd',
                     }}
                   >
                     {labelForLevel(lv)}
@@ -330,13 +330,13 @@ export default function ElectionDetail() {
                       const img = photoSrc(c.photo_url)
                       const isLead = i === 0 && c.votes > 0
                       const fillPct = maxVotes > 0 ? (c.votes / maxVotes) * 100 : 0
-                      const accent = isLead ? '#fbbf24' : '#a5b4fc'
+                      const accent = isLead ? '#fbbf24' : '#93c5fd'
                       const trackBorder = isLead
                         ? 'rgba(251,191,36,0.4)'
                         : 'rgba(148,163,184,0.2)'
                       const fillBg = isLead
                         ? 'linear-gradient(90deg, #d97706 0%, #fbbf24 70%, #fde68a 100%)'
-                        : 'linear-gradient(90deg, #4f46e5 0%, #818cf8 100%)'
+                        : 'linear-gradient(90deg, #2333b4 0%, #ff4b3a 100%)'
 
                       return (
                         <li
@@ -409,7 +409,7 @@ export default function ElectionDetail() {
                                 width: `${Math.max(fillPct, c.votes > 0 ? 10 : 0)}%`,
                                 background: fillBg,
                                 boxShadow: c.votes > 0
-                                  ? `0 0 18px ${isLead ? 'rgba(251,191,36,0.35)' : 'rgba(99,102,241,0.3)'}`
+                                  ? `0 0 18px ${isLead ? 'rgba(251,191,36,0.35)' : 'rgba(35,51,180,0.3)'}`
                                   : 'none',
                               }}
                             />

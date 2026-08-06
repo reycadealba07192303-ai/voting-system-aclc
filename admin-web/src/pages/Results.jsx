@@ -11,7 +11,7 @@ import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
 import ElectionSelect from '../components/ui/ElectionSelect'
 
-const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b']
+const COLORS = ['#2333b4', '#2b35b7', '#ff4b3a', '#06b6d4', '#10b981', '#f59e0b']
 const SYNC_MS = 8000
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div className="px-3 py-2 rounded-xl text-xs" style={{ background: '#1e2433', border: '1px solid rgba(255,255,255,0.1)' }}>
         <p className="text-white font-semibold">{label}</p>
-        <p style={{ color: '#a5b4fc' }}>{payload[0].value} votes</p>
+        <p style={{ color: '#93c5fd' }}>{payload[0].value} votes</p>
       </div>
     )
   }
@@ -107,7 +107,7 @@ export default function Results() {
             onClick={() => setTab(t)}
             className="px-4 py-1.5 text-sm font-medium rounded-lg transition-all"
             style={tab === t
-              ? { background: 'rgba(99,102,241,0.25)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }
+              ? { background: 'rgba(35,51,180,0.25)', color: '#93c5fd', border: '1px solid rgba(35,51,180,0.3)' }
               : { color: '#64748b', border: '1px solid transparent' }
             }
           >
@@ -118,7 +118,7 @@ export default function Results() {
 
       {loading && results.length === 0 ? (
         <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
           Loading…
         </div>
       ) : tab === 'results' ? (
@@ -135,9 +135,16 @@ export default function Results() {
             </div>
           ) : results.map((position) => (
             <div key={position._id} className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
                 <h3 className="font-semibold text-white">{position.title}</h3>
-                {currentElection && <Badge label={currentElection.status} variant={currentElection.status} />}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {position.abstentions > 0 && (
+                    <span className="text-xs text-slate-500">
+                      {position.abstentions} abstention{position.abstentions !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  {currentElection && <Badge label={currentElection.status} variant={currentElection.status} />}
+                </div>
               </div>
 
               <ResponsiveContainer width="100%" height={Math.max(180, position.candidates?.length * 48)}>
@@ -161,8 +168,17 @@ export default function Results() {
                     <span key={w._id} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
                       style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' }}>
                       🏆 {w.name} — {w.votes} votes
+                      {w.vote_percentage != null ? ` (${w.vote_percentage}% of voters)` : ''}
                     </span>
                   ))}
+                </div>
+              )}
+              {position.solo_unopposed && position.winners?.length === 0 && position.candidates?.length === 1 && (
+                <div className="mt-4 rounded-xl px-4 py-3 text-xs"
+                  style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#fcd34d' }}>
+                  Solo candidate did not reach {position.solo_majority_required_pct ?? 51}% of total voters
+                  ({position.candidates[0]?.votes ?? 0}/{position.total_voters ?? 0}).
+                  No winner declared for this position.
                 </div>
               )}
             </div>
@@ -195,9 +211,9 @@ export default function Results() {
                     <td className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-20 rounded-full h-1.5" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                          <div className="h-full rounded-full" style={{ width: `${row.turnout}%`, background: 'linear-gradient(90deg, #6366f1, #8b5cf6)' }} />
+                          <div className="h-full rounded-full" style={{ width: `${row.turnout}%`, background: 'linear-gradient(90deg, #2333b4, #2b35b7)' }} />
                         </div>
-                        <span className="text-xs text-indigo-400 font-medium w-8 text-right">{row.turnout}%</span>
+                        <span className="text-xs text-blue-300 font-medium w-8 text-right">{row.turnout}%</span>
                       </div>
                     </td>
                   </tr>

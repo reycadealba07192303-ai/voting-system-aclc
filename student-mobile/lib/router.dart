@@ -10,17 +10,21 @@ import 'screens/voting/voting_screen.dart';
 import 'screens/voting/confirmation_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/shell_screen.dart';
+import 'screens/splash/splash_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
 
 GoRouter createAppRouter(AuthService auth) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/',
     refreshListenable: auth,
     redirect: (context, state) {
       final isLoggedIn = auth.isLoggedIn;
       final loc = state.matchedLocation;
-      const publicRoutes = ['/login', '/set-password'];
+      const publicRoutes = ['/', '/onboarding', '/login', '/set-password'];
 
-      if (!isLoggedIn && !publicRoutes.contains(loc)) {
+      if (publicRoutes.contains(loc)) return null;
+
+      if (!isLoggedIn) {
         return '/login';
       }
 
@@ -31,6 +35,14 @@ GoRouter createAppRouter(AuthService auth) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (_, __) => const LoginScreen(),

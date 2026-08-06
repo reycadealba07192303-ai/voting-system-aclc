@@ -1,13 +1,27 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --aclc-blue: #2333b4;
+    --aclc-blue-dark: #1d248f;
+    --aclc-blue-light: #2b35b7;
+    --aclc-red: #ff4b3a;
+    --aclc-bg: #0b1020;
+    --aclc-surface: #12182c;
+    --aclc-accent: #93c5fd;
+    --aclc-accent-soft: rgba(35, 51, 180, 0.28);
+    --aclc-gradient: linear-gradient(135deg, #2333b4, #ff4b3a);
+    --aclc-gradient-hover: linear-gradient(135deg, #1d248f, #e63e2f);
+    --aclc-progress: linear-gradient(90deg, #2333b4, #ff4b3a);
+  }
+
   * {
     box-sizing: border-box;
   }
 
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #0f1117;
+    background-color: var(--aclc-bg);
     color: #e2e8f0;
     -webkit-font-smoothing: antialiased;
   }
@@ -28,7 +42,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    background: var(--aclc-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -52,9 +66,9 @@
   }
 
   .sidebar-link.active {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2));
-    color: #a5b4fc;
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, rgba(35, 51, 180, 0.35), rgba(255, 75, 58, 0.12));
+    color: #bfdbfe;
+    border: 1px solid rgba(35, 51, 180, 0.4);
   }
 
   .input-dark {
@@ -69,7 +83,6 @@
     outline: none;
   }
 
-  /* Extra left room when an absolute icon sits inside the field */
   .input-dark.has-icon {
     padding-left: 2.75rem;
   }
@@ -79,9 +92,9 @@
   }
 
   .input-dark:focus {
-    border-color: rgba(99, 102, 241, 0.6);
+    border-color: rgba(35, 51, 180, 0.65);
     background: rgba(255, 255, 255, 0.07);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px rgba(35, 51, 180, 0.18);
   }
 
   .btn-primary {
@@ -89,7 +102,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: var(--aclc-gradient);
     color: white;
     font-size: 0.875rem;
     font-weight: 600;
@@ -100,9 +113,9 @@
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: var(--aclc-gradient-hover);
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 8px 20px rgba(35, 51, 180, 0.35);
   }
 
   .btn-primary:disabled {
@@ -183,7 +196,6 @@
     color: #cbd5e1;
   }
 
-  /* Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

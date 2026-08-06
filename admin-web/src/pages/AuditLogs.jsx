@@ -6,12 +6,12 @@ import useAutoSync from '../hooks/useAutoSync'
 import PageHeader from '../components/ui/PageHeader'
 
 const ACTION_MAP = {
-  login:  { bg: 'rgba(99,102,241,0.18)',  color: '#c7d2fe', label: 'Login' },
+  login:  { bg: 'rgba(35,51,180,0.18)',  color: '#c7d2fe', label: 'Login' },
   logout: { bg: 'rgba(148,163,184,0.14)', color: '#cbd5e1', label: 'Logout' },
   create: { bg: 'rgba(16,185,129,0.16)',  color: '#6ee7b7', label: 'Create' },
   update: { bg: 'rgba(245,158,11,0.16)',  color: '#fcd34d', label: 'Update' },
   delete: { bg: 'rgba(239,68,68,0.16)',   color: '#fca5a5', label: 'Delete' },
-  open:   { bg: 'rgba(139,92,246,0.16)',  color: '#c4b5fd', label: 'Open' },
+  open:   { bg: 'rgba(255,75,58,0.16)',  color: '#93c5fd', label: 'Open' },
   close:  { bg: 'rgba(249,115,22,0.16)',  color: '#fdba74', label: 'Close' },
   import: { bg: 'rgba(6,182,212,0.16)',   color: '#67e8f9', label: 'Import' },
 }
@@ -204,7 +204,7 @@ export default function AuditLogs() {
                             <span
                               className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                               style={{
-                                background: 'linear-gradient(135deg, rgba(99,102,241,0.45), rgba(34,211,238,0.25))',
+                                background: 'linear-gradient(135deg, rgba(35,51,180,0.45), rgba(34,211,238,0.25))',
                                 color: '#e0e7ff',
                               }}
                             >

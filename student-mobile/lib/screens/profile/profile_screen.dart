@@ -372,9 +372,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         position: v['position_id'] is Map
                                             ? v['position_id']['title']
                                             : '—',
-                                        candidate: v['candidate_id'] is Map
-                                            ? v['candidate_id']['name']
-                                            : '—',
+                                        candidate: v['is_abstain'] == true
+                                            ? 'Abstain'
+                                            : v['candidate_id'] is Map
+                                                ? v['candidate_id']['name']
+                                                : '—',
                                       ),
                                   ],
                                 ),

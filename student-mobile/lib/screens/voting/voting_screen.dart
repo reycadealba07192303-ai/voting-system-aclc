@@ -85,22 +85,27 @@ class _VotingScreenState extends State<VotingScreen> {
   }
 
   void _review() {
-    if (_selections.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('Select at least one candidate to submit.'),
-        backgroundColor: AppColors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ));
-      return;
-    }
     _showReviewSheet();
+  }
+
+  List<Map<String, dynamic>> _buildSubmissionVotes() {
+    final ballot = context.read<ElectionService>().ballot;
+    return ballot.map((pos) {
+      final posId = pos['_id'].toString();
+      if (_selections.containsKey(posId)) {
+        return {'position_id': posId, 'candidate_id': _selections[posId]!};
+      }
+      return {'position_id': posId, 'is_abstain': true};
+    }).toList();
   }
 
   void _showReviewSheet() {
     final ballot = context.read<ElectionService>().ballot;
     final skipped = ballot
         .where((pos) => !_selections.containsKey(pos['_id'].toString()))
+        .toList();
+    final picked = ballot
+        .where((pos) => _selections.containsKey(pos['_id'].toString()))
         .toList();
 
     showModalBottomSheet(
@@ -146,10 +151,7 @@ class _VotingScreenState extends State<VotingScreen> {
                 controller: scroll,
                 padding: const EdgeInsets.all(20),
                 children: [
-                  ...ballot
-                      .where((pos) =>
-                          _selections.containsKey(pos['_id'].toString()))
-                      .map((pos) {
+                  ...picked.map((pos) {
                     final posId = pos['_id'].toString();
                     final candId = _selections[posId]!;
                     final cands =
@@ -167,7 +169,7 @@ class _VotingScreenState extends State<VotingScreen> {
                   if (skipped.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'Skipped (${skipped.length})',
+                      'Abstained (${skipped.length})',
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 11,
@@ -179,7 +181,7 @@ class _VotingScreenState extends State<VotingScreen> {
                     ...skipped.map((pos) => Padding(
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
-                            '• ${pos['title']} — no vote',
+                            '• ${pos['title']} — Abstain',
                             style: const TextStyle(
                               color: AppColors.textMuted,
                               fontSize: 12,
@@ -270,9 +272,7 @@ class _VotingScreenState extends State<VotingScreen> {
     final authSvc = context.read<AuthService>();
     try {
       final electionId = svc.activeElection!['_id'];
-      final votes = _selections.entries
-          .map((e) => {'position_id': e.key, 'candidate_id': e.value})
-          .toList();
+      final votes = _buildSubmissionVotes();
       await svc.submitVote(electionId, votes);
       authSvc.markVoted();
       if (mounted) context.go('/confirmation');
@@ -391,7 +391,7 @@ class _VotingScreenState extends State<VotingScreen> {
                       ),
                     ),
                     Text(
-                      '${_selections.length} voted · ${ballot.length - _selections.length} skipped',
+                      '${_selections.length} voted · ${ballot.length - _selections.length} abstained',
                       style: const TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 11,
@@ -431,7 +431,7 @@ class _VotingScreenState extends State<VotingScreen> {
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'Choose one candidate, or skip this position.',
+                  'Choose one candidate, or select Abstain.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
@@ -460,7 +460,7 @@ class _VotingScreenState extends State<VotingScreen> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'You can skip and continue.',
+                          'You may abstain on this position.',
                           style: TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 12,
@@ -483,20 +483,11 @@ class _VotingScreenState extends State<VotingScreen> {
                       ),
                     );
                   }),
-                if (selectedId != null) ...[
-                  const SizedBox(height: 4),
-                  TextButton(
-                    onPressed: () => setState(() => _selections.remove(posId)),
-                    child: const Text(
-                      'Clear selection (skip this position)',
-                      style: TextStyle(
-                        color: AppColors.red,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 4),
+                _VoteAbstainOption(
+                  selected: selectedId == null,
+                  onTap: () => setState(() => _selections.remove(posId)),
+                ),
               ],
             ),
           ),
@@ -634,6 +625,77 @@ class _VoteOption extends StatelessWidget {
   }
 }
 
+class _VoteAbstainOption extends StatelessWidget {
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _VoteAbstainOption({
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFF8FAFC) : AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? AppColors.textMuted : AppColors.border,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected ? AppColors.textMuted : Colors.transparent,
+                border: Border.all(
+                  color: selected ? AppColors.textMuted : AppColors.textMuted,
+                  width: 2,
+                ),
+              ),
+              child: selected
+                  ? const Icon(Icons.remove_rounded, color: Colors.white, size: 13)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Abstain',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'No vote for this position',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Post-vote: polished receipt card → opens full "Your Votes" UI on tap.
 class _VoteReceiptView extends StatefulWidget {
   final bool loading;
@@ -692,12 +754,26 @@ class _VoteReceiptViewState extends State<_VoteReceiptView>
     final votes = (widget.voteStatus?['votes'] as List?) ?? [];
     return votes.map((v) {
       final pos = v['position_id'];
+      final isAbstain = v['is_abstain'] == true;
       final cand = v['candidate_id'];
       return {
         'position': pos is Map ? (pos['title'] ?? '—') : '—',
-        'candidate': cand is Map ? (cand['name'] ?? '—') : '—',
-        'partylist': cand is Map ? cand['partylist'] as String? : null,
-        'photo_url': cand is Map ? cand['photo_url'] as String? : null,
+        'candidate': isAbstain
+            ? 'Abstain'
+            : cand is Map
+                ? (cand['name'] ?? '—')
+                : '—',
+        'partylist': isAbstain
+            ? null
+            : cand is Map
+                ? cand['partylist'] as String?
+                : null,
+        'photo_url': isAbstain
+            ? null
+            : cand is Map
+                ? cand['photo_url'] as String?
+                : null,
+        'is_abstain': isAbstain,
       };
     }).toList();
   }
@@ -719,6 +795,7 @@ class _VoteReceiptViewState extends State<_VoteReceiptView>
     final election = context.watch<ElectionService>();
     final results = election.results;
     final myCandidateIds = ((widget.voteStatus?['votes'] as List?) ?? [])
+        .where((v) => v['is_abstain'] != true)
         .map((v) {
           final c = v['candidate_id'];
           if (c is Map) return c['_id']?.toString();
@@ -833,7 +910,7 @@ class _VoteReceiptViewState extends State<_VoteReceiptView>
                               Text(
                                 votes.isEmpty
                                     ? 'No vote details found'
-                                    : 'You voted for ${votes.length} position${votes.length == 1 ? '' : 's'}',
+                                    : 'Ballot submitted for ${votes.length} position${votes.length == 1 ? '' : 's'}',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.8),
                                   fontSize: 13,
@@ -1020,7 +1097,7 @@ class _MyVotesScreen extends StatelessWidget {
                 Text(
                   votes.isEmpty
                       ? 'No votes on this receipt'
-                      : '${votes.length} candidate${votes.length == 1 ? '' : 's'} you voted for',
+                      : '${votes.length} position${votes.length == 1 ? '' : 's'} on your ballot',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.78),
                     fontSize: 13,
@@ -1061,6 +1138,7 @@ class _MyVotesScreen extends StatelessWidget {
                   candidate: v['candidate'] as String,
                   partylist: v['partylist'] as String?,
                   photoUrl: v['photo_url'] as String?,
+                  isAbstain: v['is_abstain'] == true,
                 )),
         ],
       ),
@@ -1073,12 +1151,14 @@ class _VotedCandidateCard extends StatelessWidget {
   final String candidate;
   final String? partylist;
   final String? photoUrl;
+  final bool isAbstain;
 
   const _VotedCandidateCard({
     required this.position,
     required this.candidate,
     this.partylist,
     this.photoUrl,
+    this.isAbstain = false,
   });
 
   @override
@@ -1101,11 +1181,22 @@ class _VotedCandidateCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CandidateAvatar(
-            photoUrl: photoUrl,
-            name: candidate,
-            size: 52,
-          ),
+          if (isAbstain)
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.remove_rounded, color: AppColors.textMuted),
+            )
+          else
+            CandidateAvatar(
+              photoUrl: photoUrl,
+              name: candidate,
+              size: 52,
+            ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -1123,8 +1214,8 @@ class _VotedCandidateCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   candidate,
-                  style: const TextStyle(
-                    color: AppColors.text,
+                  style: TextStyle(
+                    color: isAbstain ? AppColors.textSecondary : AppColors.text,
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
@@ -1148,12 +1239,12 @@ class _VotedCandidateCard extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: AppColors.successSoft,
+              color: isAbstain ? const Color(0xFFF1F5F9) : AppColors.successSoft,
               borderRadius: BorderRadius.circular(11),
             ),
-            child: const Icon(
-              Icons.check_rounded,
-              color: AppColors.success,
+            child: Icon(
+              isAbstain ? Icons.remove_rounded : Icons.check_rounded,
+              color: isAbstain ? AppColors.textMuted : AppColors.success,
               size: 18,
             ),
           ),
@@ -1181,6 +1272,10 @@ class _TallyPositionCard extends StatelessWidget {
         .map((c) => (c['votes'] as num?)?.toInt() ?? 0)
         .fold<int>(0, (a, b) => a > b ? a : b);
 
+    final abstentions = (position['abstentions'] as num?)?.toInt() ?? 0;
+    final soloUnopposed = position['solo_unopposed'] == true;
+    final soloMet = position['solo_majority_met'] == true;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
@@ -1193,14 +1288,49 @@ class _TallyPositionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            position['title'] ?? '',
-            style: const TextStyle(
-              color: AppColors.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  position['title'] ?? '',
+                  style: const TextStyle(
+                    color: AppColors.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (abstentions > 0)
+                Text(
+                  '$abstentions abstain',
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
+          if (soloUnopposed && !soloMet && candidates.length == 1) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.warningSoft,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Text(
+                'Solo candidate needs ${position['solo_majority_required_pct'] ?? 51}% of voters to win.',
+                style: const TextStyle(
+                  color: Color(0xFF92400E),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           ...candidates.asMap().entries.map((entry) {
             final i = entry.key;

@@ -8,12 +8,13 @@ import {
   BarChart3,
   ScrollText,
   LogOut,
-  Zap,
   KeyRound,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { changeAdminPassword } from '../../api/auth'
 import Modal from '../ui/Modal'
+import BrandLogo from '../BrandLogo'
+import { BRAND } from '../../constants/branding'
 import toast from 'react-hot-toast'
 
 const NAV_ITEMS = [
@@ -66,23 +67,12 @@ export default function Sidebar() {
       <aside
         className="flex flex-col w-60 h-full shrink-0 overflow-y-auto"
         style={{
-          background: 'linear-gradient(180deg, #12131a 0%, #0f1117 100%)',
+          background: 'linear-gradient(180deg, #12182c 0%, #0b1020 100%)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         <div className="px-5 py-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-            >
-              <Zap size={15} className="text-white" />
-            </div>
-            <div>
-              <p className="text-white text-sm font-bold leading-none">SSG Elections</p>
-              <p className="text-slate-500 text-xs mt-0.5">Admin Panel</p>
-            </div>
-          </div>
+          <BrandLogo size="sm" subtitle={BRAND.panel} />
         </div>
 
         <div className="mx-5 mb-4" style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
@@ -113,7 +103,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+              style={{ background: BRAND.gradient }}
             >
               {initials}
             </div>

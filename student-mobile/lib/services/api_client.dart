@@ -5,9 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   // Override at build time: --dart-define=API_BASE_URL=https://api.example.com/api
+  // Physical device: use your PC LAN IP (same Wi‑Fi). Emulator: http://10.0.2.2:5000/api
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5000/api', // Android emulator default
+    defaultValue: 'http://192.168.50.231:5000/api',
   );
 
   /// Origin without trailing `/api` — for photo URLs under `/uploads`.

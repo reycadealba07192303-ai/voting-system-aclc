@@ -10,6 +10,7 @@ const Vote = require('../models/Vote')
 const Student = require('../models/Student')
 const { studentOnly } = require('../middleware/auth')
 const { studentCanAccessElection } = require('../constants/levels')
+const { buildElectionResults } = require('../utils/electionResults')
 
 async function loadStudentLevel(req) {
   const student = await Student.findById(req.user.id).select('level section name student_id has_voted')
@@ -132,8 +133,19 @@ router.get('/vote-status/:electionId', studentOnly, async (req, res) => {
     const votes = await Vote.find({
       election_id: req.params.electionId,
       student_id: req.user.id,
-    }).populate('candidate_id', 'name partylist photo_url').populate('position_id', 'title')
-    res.json({ has_voted: votes.length > 0, votes })
+    })
+      .populate('candidate_id', 'name partylist photo_url')
+      .populate('position_id', 'title')
+    res.json({
+      has_voted: votes.length > 0,
+      votes: votes.map((v) => ({
+        _id: v._id,
+        position_id: v.position_id,
+        candidate_id: v.candidate_id,
+        is_abstain: v.is_abstain,
+        timestamp: v.timestamp,
+      })),
+    })
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
@@ -146,36 +158,19 @@ router.get('/election/:electionId/results', studentOnly, async (req, res) => {
     if (access.error) return res.status(access.error.status).json({ message: access.error.message })
 
     const { electionId } = req.params
-    const positions = await Position.find({ election_id: electionId })
-    const candidates = await Candidate.find({ election_id: electionId })
-      .select('name photo_url partylist position_id')
-    const votes = await Vote.find({ election_id: electionId }).select('candidate_id')
+    const [positions, candidates, votes, voterIds] = await Promise.all([
+      Position.find({ election_id: electionId }),
+      Candidate.find({ election_id: electionId }).select('name photo_url partylist position_id'),
+      Vote.find({ election_id: electionId }),
+      Vote.distinct('student_id', { election_id: electionId }),
+    ])
 
-    const voteCounts = {}
-    for (const v of votes) {
-      const id = v.candidate_id.toString()
-      voteCounts[id] = (voteCounts[id] || 0) + 1
-    }
-
-    const results = positions.map((pos) => {
-      const posCandidates = candidates
-        .filter((c) => c.position_id.toString() === pos._id.toString())
-        .map((c) => ({
-          _id: c._id,
-          name: c.name,
-          photo_url: c.photo_url,
-          partylist: c.partylist,
-          votes: voteCounts[c._id.toString()] || 0,
-        }))
-        .sort((a, b) => b.votes - a.votes)
-
-      return {
-        _id: pos._id,
-        title: pos.title,
-        max_winners: pos.max_winners,
-        candidates: posCandidates,
-      }
-    })
+    const results = buildElectionResults(
+      positions,
+      candidates,
+      votes,
+      voterIds.length
+    )
 
     res.json(results)
   } catch (err) {

@@ -5,32 +5,25 @@ const Position = require('../models/Position')
 const Student = require('../models/Student')
 const Election = require('../models/Election')
 const { adminOnly } = require('../middleware/auth')
+const { buildElectionResults } = require('../utils/electionResults')
 
 // GET /api/elections/:electionId/results
 router.get('/', adminOnly, async (req, res) => {
   try {
     const { electionId } = req.params
-    const positions = await Position.find({ election_id: electionId })
-    const candidates = await Candidate.find({ election_id: electionId })
-    const votes = await Vote.find({ election_id: electionId })
+    const [positions, candidates, votes, voterIds] = await Promise.all([
+      Position.find({ election_id: electionId }),
+      Candidate.find({ election_id: electionId }),
+      Vote.find({ election_id: electionId }),
+      Vote.distinct('student_id', { election_id: electionId }),
+    ])
 
-    const results = positions.map((pos) => {
-      const posCandidates = candidates.filter(
-        (c) => c.position_id.toString() === pos._id.toString()
-      )
-      const candidateResults = posCandidates.map((c) => ({
-        _id: c._id,
-        name: c.name,
-        photo_url: c.photo_url,
-        partylist: c.partylist,
-        votes: votes.filter((v) => v.candidate_id.toString() === c._id.toString()).length,
-      }))
-      candidateResults.sort((a, b) => b.votes - a.votes)
-
-      const winners = candidateResults.slice(0, pos.max_winners).filter((c) => c.votes > 0)
-
-      return { _id: pos._id, title: pos.title, candidates: candidateResults, winners }
-    })
+    const results = buildElectionResults(
+      positions,
+      candidates,
+      votes,
+      voterIds.length
+    )
 
     res.json(results)
   } catch (err) {
@@ -50,7 +43,6 @@ router.get('/monitoring', adminOnly, async (req, res) => {
     const votes = await Vote.find({ election_id: electionId }).distinct('student_id')
     const votedSet = new Set(votes.map((id) => id.toString()))
 
-    // Group by section
     const sectionMap = {}
     for (const s of students) {
       const sec = s.section || 'No Section'

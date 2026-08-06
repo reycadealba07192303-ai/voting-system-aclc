@@ -8,7 +8,7 @@ export default function AppLayout() {
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0f1117' }}>
+    <div className="flex min-h-screen" style={{ background: '#0b1020' }}>
       {/* Sticky left nav — stays put while main content scrolls */}
       <div className="sticky top-0 h-screen shrink-0 z-30">
         <Sidebar />

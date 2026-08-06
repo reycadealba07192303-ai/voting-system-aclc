@@ -65,7 +65,7 @@ class ElectionService extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> submitVote(
-      String electionId, List<Map<String, String>> votes) async {
+      String electionId, List<Map<String, dynamic>> votes) async {
     final res = await ApiClient.post('/votes', {
       'election_id': electionId,
       'votes': votes,

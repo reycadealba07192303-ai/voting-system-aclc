@@ -10,11 +10,12 @@ export const resetStudentPassword = (id) =>
 /** View-only ballot — available after the election is closed. */
 export const getStudentBallot = (id) => api.get(`/students/${id}/ballot`)
 
-/** Import CSV or Excel. Pass `section` to force section for 2-column files. */
-export const importStudents = (file, section) => {
+/** Import CSV or Excel. Pass `section`/`level` to force values for 2-column files. */
+export const importStudents = (file, section, level) => {
   const form = new FormData()
   form.append('file', file)
   if (section) form.append('section', section)
+  if (level) form.append('level', level)
   return api.post('/students/import', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })

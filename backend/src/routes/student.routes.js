@@ -176,14 +176,17 @@ router.get('/:id/ballot', adminOnly, async (req, res) => {
         position: v.position_id
           ? { _id: v.position_id._id, title: v.position_id.title }
           : null,
-        candidate: v.candidate_id
-          ? {
-              _id: v.candidate_id._id,
-              name: v.candidate_id.name,
-              partylist: v.candidate_id.partylist,
-              photo_url: v.candidate_id.photo_url,
-            }
-          : null,
+        candidate: v.is_abstain
+          ? null
+          : v.candidate_id
+            ? {
+                _id: v.candidate_id._id,
+                name: v.candidate_id.name,
+                partylist: v.candidate_id.partylist,
+                photo_url: v.candidate_id.photo_url,
+              }
+            : null,
+        is_abstain: !!v.is_abstain,
         timestamp: v.timestamp,
       })
     }

@@ -1,9 +1,9 @@
 const gradients = {
-  blue:   { bg: 'rgba(99,102,241,0.12)',  icon: 'rgba(99,102,241,0.25)',  text: '#818cf8', glow: 'rgba(99,102,241,0.3)'   },
+  blue:   { bg: 'rgba(35,51,180,0.12)',  icon: 'rgba(35,51,180,0.25)',  text: '#93c5fd', glow: 'rgba(35,51,180,0.3)'   },
   green:  { bg: 'rgba(16,185,129,0.10)',  icon: 'rgba(16,185,129,0.22)',  text: '#34d399', glow: 'rgba(16,185,129,0.25)'  },
   yellow: { bg: 'rgba(245,158,11,0.10)',  icon: 'rgba(245,158,11,0.22)',  text: '#fbbf24', glow: 'rgba(245,158,11,0.25)'  },
   red:    { bg: 'rgba(239,68,68,0.10)',   icon: 'rgba(239,68,68,0.22)',   text: '#f87171', glow: 'rgba(239,68,68,0.25)'   },
-  purple: { bg: 'rgba(139,92,246,0.12)',  icon: 'rgba(139,92,246,0.25)',  text: '#a78bfa', glow: 'rgba(139,92,246,0.3)'   },
+  purple: { bg: 'rgba(255,75,58,0.12)',  icon: 'rgba(255,75,58,0.25)',  text: '#fca5a5', glow: 'rgba(255,75,58,0.3)'   },
 }
 
 export default function StatCard({ label, value, icon: Icon, color = 'blue', sub }) {

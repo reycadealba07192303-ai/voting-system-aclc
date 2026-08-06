@@ -103,13 +103,13 @@ export default function SelectDropdown({
                   className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
                   style={
                     active
-                      ? { background: 'rgba(99,102,241,0.14)' }
+                      ? { background: 'rgba(35,51,180,0.14)' }
                       : undefined
                   }
                 >
                   <span
                     className={`text-sm truncate ${
-                      active ? 'text-indigo-200 font-medium' : 'text-slate-200'
+                      active ? 'text-blue-100 font-medium' : 'text-slate-200'
                     }`}
                   >
                     {opt.label}
@@ -138,13 +138,13 @@ export default function SelectDropdown({
         style={{
           background: 'rgba(255,255,255,0.05)',
           border: open
-            ? '1px solid rgba(99,102,241,0.55)'
+            ? '1px solid rgba(35,51,180,0.55)'
             : '1px solid rgba(255,255,255,0.1)',
-          boxShadow: open ? '0 0 0 3px rgba(99,102,241,0.15)' : 'none',
+          boxShadow: open ? '0 0 0 3px rgba(35,51,180,0.15)' : 'none',
           cursor: 'pointer',
         }}
       >
-        {Icon ? <Icon size={15} className="shrink-0 text-indigo-300/80" /> : null}
+        {Icon ? <Icon size={15} className="shrink-0 text-blue-200/80" /> : null}
         <span
           className={`flex-1 text-sm truncate ${
             selected ? 'text-slate-100' : 'text-slate-500'

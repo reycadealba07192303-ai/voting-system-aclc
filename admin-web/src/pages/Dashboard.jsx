@@ -120,7 +120,7 @@ export default function Dashboard() {
             <div
               className="rounded-2xl p-6 mb-8"
               style={{
-                background: 'linear-gradient(135deg, rgba(34,211,238,0.08), rgba(99,102,241,0.08))',
+                background: 'linear-gradient(135deg, rgba(34,211,238,0.08), rgba(35,51,180,0.08))',
                 border: '1px solid rgba(34,211,238,0.18)',
               }}
             >
@@ -158,7 +158,7 @@ export default function Dashboard() {
                       className="h-full rounded-full transition-all duration-700"
                       style={{
                         width: `${stats.turnout}%`,
-                        background: 'linear-gradient(90deg, #22d3ee, #6366f1)',
+                        background: 'linear-gradient(90deg, #22d3ee, #2333b4)',
                       }}
                     />
                   </div>

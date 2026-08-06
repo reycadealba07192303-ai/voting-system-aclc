@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../constants/branding.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 
@@ -114,22 +115,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      'assets/images/login_hero.png',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                    ),
-                    DecoratedBox(
+                    const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                           colors: [
-                            AppColors.blueDeep.withValues(alpha: 0.35),
-                            AppColors.blueDeep.withValues(alpha: 0.15),
-                            AppColors.blueDeep.withValues(alpha: 0.75),
+                            Color(0xFF1D248F),
+                            Color(0xFF2333B4),
+                            Color(0xFF161D73),
                           ],
-                          stops: const [0.0, 0.45, 1.0],
                         ),
                       ),
                     ),
@@ -138,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       left: 0,
                       right: 0,
                       child: ColoredBox(
-                        color: AppColors.red,
+                        color: Color(0xFFFF4B3A),
                         child: SizedBox(height: 4),
                       ),
                     ),
@@ -150,6 +145,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: topInset),
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              Branding.logoAsset,
+                              width: 56,
+                              height: 56,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
@@ -172,10 +187,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 12),
                           const Text(
-                            'SSG Elections',
+                            Branding.collegeName,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 30,
+                              fontSize: 28,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.6,
                               height: 1.1,
@@ -183,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Your voice. Your vote. Your school.',
+                            Branding.tagline,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 13,

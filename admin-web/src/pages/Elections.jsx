@@ -154,7 +154,7 @@ export default function Elections() {
 
       {loading ? (
         <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
           Loading…
         </div>
       ) : elections.length === 0 ? (
@@ -179,7 +179,7 @@ export default function Elections() {
                     className="flex-1 min-w-0 text-left group"
                   >
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-white truncate group-hover:text-indigo-300 transition-colors">
+                      <h3 className="font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
                         {el.title}
                       </h3>
                       <Badge label={el.status} variant={el.status} />
@@ -194,9 +194,9 @@ export default function Elections() {
                             key={lv}
                             className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
                             style={{
-                              background: 'rgba(99,102,241,0.15)',
-                              border: '1px solid rgba(99,102,241,0.28)',
-                              color: '#a5b4fc',
+                              background: 'rgba(35,51,180,0.15)',
+                              border: '1px solid rgba(35,51,180,0.28)',
+                              color: '#93c5fd',
                             }}
                           >
                             {labelForLevel(lv)}
@@ -205,7 +205,7 @@ export default function Elections() {
                       </div>
                     )}
                     {el.description && <p className="text-xs text-slate-600 mt-1 truncate">{el.description}</p>}
-                    <p className="text-[11px] text-indigo-400/80 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-[11px] text-blue-300/80 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       View all candidates →
                     </p>
                   </button>
@@ -214,8 +214,8 @@ export default function Elections() {
                     <button onClick={() => toggleExpand(el._id)} title="Manage positions"
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         isExpanded
-                          ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                          : 'text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 border border-transparent'
+                          ? 'bg-blue-700/20 text-blue-300 border border-blue-700/30'
+                          : 'text-slate-500 hover:text-blue-300 hover:bg-blue-700/10 border border-transparent'
                       }`}>
                       <ListOrdered size={13} />
                       Positions
@@ -235,7 +235,7 @@ export default function Elections() {
                       </button>
                     )}
                     <button onClick={() => openElModal(el)}
-                      className="p-2 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
+                      className="p-2 rounded-lg text-slate-500 hover:text-blue-300 hover:bg-blue-700/10 transition-colors">
                       <Pencil size={15} />
                     </button>
                     <button onClick={() => setConfirmDelete(el._id)}
@@ -256,7 +256,7 @@ export default function Elections() {
 
                     {posLoading && !positionsMap[el._id] ? (
                       <div className="flex items-center gap-2 text-slate-600 text-xs py-2">
-                        <div className="w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
                         Loading…
                       </div>
                     ) : positions.length === 0 ? (
@@ -269,7 +269,7 @@ export default function Elections() {
                           <div key={pos._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
                             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <span className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
-                              style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc' }}>
+                              style={{ background: 'rgba(35,51,180,0.2)', color: '#93c5fd' }}>
                               {idx + 1}
                             </span>
                             <span className="flex-1 text-sm text-slate-200 font-medium">{pos.title}</span>
@@ -277,7 +277,7 @@ export default function Elections() {
                               {pos.max_winners === 1 ? '1 winner' : `${pos.max_winners} winners`}
                             </span>
                             <button onClick={() => openPosModal(el._id, pos)}
-                              className="p-1.5 rounded-lg text-slate-600 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
+                              className="p-1.5 rounded-lg text-slate-600 hover:text-blue-300 hover:bg-blue-700/10 transition-colors">
                               <Pencil size={13} />
                             </button>
                             <button onClick={() => setConfirmDelPos({ electionId: el._id, positionId: pos._id })}

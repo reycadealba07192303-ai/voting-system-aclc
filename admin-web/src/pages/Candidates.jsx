@@ -106,7 +106,7 @@ export default function Candidates() {
 
       {loading ? (
         <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
           Loading…
         </div>
       ) : positions.length === 0 ? (
@@ -129,8 +129,8 @@ export default function Candidates() {
                 <div className="flex items-center gap-3 px-5 py-4 cursor-pointer"
                   onClick={() => setExpandedPos(isOpen ? null : pos._id)}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)' }}>
-                    <UserSquare2 size={15} style={{ color: '#a5b4fc' }} />
+                    style={{ background: 'rgba(35,51,180,0.2)', border: '1px solid rgba(35,51,180,0.3)' }}>
+                    <UserSquare2 size={15} style={{ color: '#93c5fd' }} />
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white text-sm">{pos.title}</p>
@@ -174,7 +174,7 @@ export default function Candidates() {
                                 style={{ background: 'rgba(0,0,0,0.5)' }}>
                                 <button onClick={() => openModal(pos._id, c)}
                                   className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                  style={{ background: 'rgba(99,102,241,0.8)' }}>
+                                  style={{ background: 'rgba(35,51,180,0.8)' }}>
                                   <Pencil size={13} className="text-white" />
                                 </button>
                                 <button onClick={() => setConfirmDelete(c._id)}
@@ -240,7 +240,7 @@ export default function Candidates() {
           <div>
             <label className={labelCls}>Photo {editing && <span className="normal-case text-slate-600 ml-1">(leave blank to keep)</span>}</label>
             <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])}
-              className="input-dark file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-indigo-500/20 file:text-indigo-400 cursor-pointer" />
+              className="input-dark file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-blue-700/20 file:text-blue-300 cursor-pointer" />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="btn-ghost" style={{ padding: '9px 16px' }}>Cancel</button>

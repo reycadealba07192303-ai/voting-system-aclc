@@ -10,21 +10,14 @@ const { studentCanAccessElection } = require('../constants/levels')
 
 /**
  * POST /api/votes
- * Body: { election_id, votes: [{ position_id, candidate_id }, ...] }
+ * Body: { election_id, votes: [{ position_id, candidate_id? , is_abstain? }, ...] }
  *
- * Security enforcements:
- *  1. Election must be "ongoing" AND within start/end date window (server time)
- *  2. Student must not have already voted — checked with atomic findOneAndUpdate
- *  3. Votes array capped at 50 entries (prevent payload abuse)
- *  4. Every position_id and candidate_id validated against the election
- *  5. candidate_id must belong to position_id (can't mix candidates across positions)
- *  6. No client timestamp trusted — server sets timestamp
+ * One entry per position on the ballot. Missing candidate = abstain.
  */
 router.post('/', studentOnly, async (req, res) => {
   const { election_id, votes } = req.body
   const studentId = req.user.id
 
-  // Basic shape validation
   if (!election_id || !mongoose.isValidObjectId(election_id)) {
     return res.status(400).json({ message: 'Valid election_id is required' })
   }
@@ -36,7 +29,6 @@ router.post('/', studentOnly, async (req, res) => {
   }
 
   try {
-    // 1. Check election is ongoing AND within date window
     const now = new Date()
     const election = await Election.findById(election_id)
     if (!election) return res.status(404).json({ message: 'Election not found' })
@@ -52,21 +44,16 @@ router.post('/', studentOnly, async (req, res) => {
       return res.status(403).json({ message: 'This election is not available for your level' })
     }
 
-    // 2. Atomic double-vote prevention
-    // Use findOneAndUpdate to atomically check and set has_voted in a single DB operation.
-    // This prevents race conditions where two simultaneous requests both pass the findOne check.
     const studentDoc = await Student.findOneAndUpdate(
-      { _id: studentId, has_voted: false },  // only succeeds if NOT already voted
+      { _id: studentId, has_voted: false },
       { $set: { has_voted: true } },
-      { new: false }                          // return original doc (before update)
+      { new: false }
     )
     if (!studentDoc) {
-      // Either student not found or has_voted was already true
       return res.status(409).json({ message: 'You have already cast your vote for this election' })
     }
 
     try {
-      // 3. Validate all vote entries — load positions and candidates for this election
       const [positions, candidates] = await Promise.all([
         Position.find({ election_id }).lean(),
         Candidate.find({ election_id }).lean(),
@@ -74,56 +61,71 @@ router.post('/', studentOnly, async (req, res) => {
 
       const positionIds  = new Set(positions.map((p) => p._id.toString()))
       const candidateMap = new Map(candidates.map((c) => [c._id.toString(), c]))
+      const seenPositions = new Set()
+
+      if (votes.length !== positions.length) {
+        throw {
+          status: 400,
+          message: `Submit one choice per position (${positions.length} required)`,
+        }
+      }
 
       for (const v of votes) {
-        if (!v.position_id || !v.candidate_id) {
-          throw { status: 400, message: 'Each vote must include position_id and candidate_id' }
-        }
-        if (!mongoose.isValidObjectId(v.position_id) || !mongoose.isValidObjectId(v.candidate_id)) {
-          throw { status: 400, message: 'Invalid position_id or candidate_id format' }
+        if (!v.position_id || !mongoose.isValidObjectId(v.position_id)) {
+          throw { status: 400, message: 'Each vote must include a valid position_id' }
         }
         if (!positionIds.has(v.position_id)) {
           throw { status: 400, message: `Position ${v.position_id} does not belong to this election` }
+        }
+        if (seenPositions.has(v.position_id)) {
+          throw { status: 400, message: `Duplicate vote for position ${v.position_id}` }
+        }
+        seenPositions.add(v.position_id)
+
+        const isAbstain = v.is_abstain === true || v.candidate_id == null || v.candidate_id === ''
+
+        if (isAbstain) continue
+
+        if (!mongoose.isValidObjectId(v.candidate_id)) {
+          throw { status: 400, message: 'Invalid candidate_id format' }
         }
         const cand = candidateMap.get(v.candidate_id)
         if (!cand) {
           throw { status: 400, message: `Candidate ${v.candidate_id} does not exist in this election` }
         }
         if (cand.position_id.toString() !== v.position_id) {
-          throw { status: 400, message: `Candidate ${v.candidate_id} does not belong to position ${v.position_id}` }
+          throw {
+            status: 400,
+            message: `Candidate ${v.candidate_id} does not belong to position ${v.position_id}`,
+          }
         }
       }
 
-      // 4. Insert all votes — server-side timestamp only
-      const voteDocs = votes.map((v) => ({
-        election_id,
-        position_id:  v.position_id,
-        candidate_id: v.candidate_id,
-        student_id:   studentId,
-        timestamp:    now,  // server time, never client-provided
-      }))
+      const voteDocs = votes.map((v) => {
+        const isAbstain = v.is_abstain === true || v.candidate_id == null || v.candidate_id === ''
+        return {
+          election_id,
+          position_id: v.position_id,
+          candidate_id: isAbstain ? null : v.candidate_id,
+          is_abstain: isAbstain,
+          student_id: studentId,
+          timestamp: now,
+        }
+      })
 
       await Vote.insertMany(voteDocs)
       res.status(201).json({ message: 'Vote submitted successfully' })
-
     } catch (innerErr) {
-      // Rollback the has_voted flag if vote insertion failed
       await Student.findByIdAndUpdate(studentId, { $set: { has_voted: false } })
       const status  = innerErr.status || 500
       const message = innerErr.message || 'Vote submission failed'
       return res.status(status).json({ message })
     }
-
   } catch (err) {
     res.status(500).json({ message: 'Vote submission failed' })
   }
 })
 
-/**
- * GET /api/votes/status/:electionId
- * Returns whether the current student has voted in this election.
- * NOTE: Does NOT return which candidate they voted for.
- */
 router.get('/status/:electionId', studentOnly, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.electionId)) {
@@ -132,7 +134,7 @@ router.get('/status/:electionId', studentOnly, async (req, res) => {
     const vote = await Vote.findOne({
       election_id: req.params.electionId,
       student_id: req.user.id,
-    }).select('_id') // only return existence, not which candidate
+    }).select('_id')
     res.json({ has_voted: !!vote })
   } catch (err) {
     res.status(500).json({ message: 'Could not fetch vote status' })

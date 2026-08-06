@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react'
+import BrandLogo from '../components/BrandLogo'
+import { BRAND } from '../constants/branding'
 
 export default function Register() {
   const { register } = useAuth()
@@ -34,59 +36,43 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0f1117' }}>
+    <div className="min-h-screen flex" style={{ background: '#0b1020' }}>
       <div
         className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #1e1b4b 100%)',
-        }}
+        style={{ background: BRAND.gradientSoft }}
       >
         <div
           className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)', filter: 'blur(40px)' }}
+          style={{ background: 'radial-gradient(circle, #ffffff, transparent 70%)', filter: 'blur(40px)' }}
         />
         <div
           className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-15 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent 70%)', filter: 'blur(40px)' }}
+          style={{ background: 'radial-gradient(circle, #ff4b3a, transparent 70%)', filter: 'blur(40px)' }}
         />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-lg"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-            >
-              S
-            </div>
-            <span className="text-white font-semibold text-lg">SSG Elections</span>
-          </div>
+          <BrandLogo size="lg" subtitle={BRAND.panel} />
         </div>
 
         <div className="relative z-10">
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
             Set up your<br />
-            <span style={{ color: '#a5b4fc' }}>admin account.</span>
+            <span style={{ color: '#dbeafe' }}>admin account.</span>
           </h2>
-          <p className="text-indigo-300 text-base leading-relaxed max-w-sm">
-            Create a secure admin profile to manage elections, candidates, and live results.
+          <p className="text-blue-100 text-base leading-relaxed max-w-sm">
+            Create a secure admin profile to manage ACLC COLLEGE OF MANILA elections.
           </p>
         </div>
 
         <div className="relative z-10">
-          <p className="text-indigo-400 text-sm">SSG Election Admin Panel · 2025</p>
+          <p className="text-blue-200 text-sm">{BRAND.name} · SSG Elections</p>
         </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
-          <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-            >
-              S
-            </div>
-            <span className="text-white font-semibold">SSG Elections</span>
+          <div className="mb-10 lg:hidden">
+            <BrandLogo size="md" subtitle={BRAND.panel} />
           </div>
 
           <h1 className="text-2xl font-bold text-white mb-1">Create admin</h1>
@@ -189,7 +175,7 @@ export default function Register() {
 
           <p className="text-sm text-slate-500 text-center mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-medium">
+            <Link to="/login" className="font-medium" style={{ color: '#93c5fd' }}>
               Sign in
             </Link>
           </p>
