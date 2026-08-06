@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pub-cache/
+
+# Secrets & local env
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Backend uploads
+backend/uploads/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+.dart_tool/
+.flutter-plugins-dependencies
+.pub/
+coverage/
+*.map.json
+app.*.symbols
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE / tooling (local)
+.idea/
+.kiro/
+.qodo/
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Flutter platform build caches
+student-mobile/android/app/debug/
+student-mobile/android/app/profile/
+student-mobile/android/app/release/
+student-mobile/ios/Flutter/.last_build_id
