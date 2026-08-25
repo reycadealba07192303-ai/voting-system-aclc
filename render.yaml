@@ -1,0 +1,37 @@
+# Render Blueprint para sa SSG voting API.
+#
+# Nasa backend/ ang server, kaya kailangan ang rootDir: kung wala ito, wala
+# namang package.json sa repo root na makikita ni Render, hindi nito mai-set up
+# ang Node, at "npm: command not found" (exit 127) ang bagsak ng build.
+services:
+  - type: web
+    name: voting-system-aclc
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # Kapag hindi production, tumatanggap ang CORS ng kahit anong private-LAN
+      # origin para sa phone testing. Hindi dapat buhay iyon sa public server.
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.19.0
+      - key: JWT_EXPIRES_IN
+        value: 4h
+      # Bukas muna habang nagpaparehistro ang mga admin. Palitan ng "false" sa
+      # dashboard bago ang election day — restart lang, walang redeploy.
+      - key: ALLOW_ADMIN_REGISTER
+        value: "true"
+      # Gawa ni Render nang isang beses; huwag ilagay ang totoong secret dito.
+      - key: JWT_SECRET
+        generateValue: true
+      # sync: false = itatanong sa iyo ni Render, hindi nakasulat sa repo.
+      - key: MONGO_URI
+        sync: false
+      # Eksaktong Vercel origin, walang trailing slash.
+      - key: ALLOWED_ORIGINS
+        sync: false

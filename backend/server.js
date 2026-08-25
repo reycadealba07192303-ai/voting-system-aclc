@@ -1,10 +1,17 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
 const os = require('os')
+const fs = require('fs')
+const path = require('path')
 const { preferPublicDns } = require('./src/utils/preferPublicDns')
 const app = require('./src/app')
 
 preferPublicDns()
+
+// Gitignored ang uploads/, at malinis na checkout ang sinisimulan ng Render at
+// ng ibang host — kaya kailangang likhain ang sinusulatan ni multer bago ang
+// unang upload, kung hindi ay ENOENT ang unang candidate photo.
+fs.mkdirSync(path.join(__dirname, 'uploads', 'candidates'), { recursive: true })
 
 const PORT = process.env.PORT || 5000
 const MONGO_URI = process.env.MONGO_URI
