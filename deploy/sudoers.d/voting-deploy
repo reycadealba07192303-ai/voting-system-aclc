@@ -1,0 +1,13 @@
+# Lets the unprivileged `voting` user restart its own service at the end of a
+# deploy, and nothing else. Without this, deploy.sh fails at the restart step
+# because `voting` has no sudo rights and a nologin shell.
+#
+# Install (visudo validates the syntax — never cp this file directly):
+#   sudo cp deploy/sudoers.d/voting-deploy /etc/sudoers.d/voting-deploy
+#   sudo chmod 440 /etc/sudoers.d/voting-deploy
+#   sudo visudo -c
+#
+# Verify the binary path first: `command -v systemctl`. A wrong path here
+# silently grants nothing.
+
+voting ALL=(root) NOPASSWD: /usr/bin/systemctl restart voting-api, /usr/bin/systemctl reload nginx

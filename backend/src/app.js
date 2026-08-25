@@ -17,8 +17,8 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 
 const ALLOWED_ORIGINS = (
   process.env.ALLOWED_ORIGINS ||
-  // 5173/5174 = admin-web (Vite), 8080 = student portal (Flutter web)
-  'http://localhost:5173,http://localhost:5174,http://localhost:8080,http://127.0.0.1:5173,http://127.0.0.1:8080'
+  // 5173/5174 = the React site (admin console + student portal) under Vite
+  'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'
 ).split(',').map((o) => o.trim()).filter(Boolean)
 
 // Outside production, also accept localhost and the same apps served over the

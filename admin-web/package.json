@@ -4,10 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "student:build": "node scripts/build-student-web.mjs",
-    "predev": "node scripts/build-student-web.mjs --if-missing",
     "dev": "vite",
-    "prebuild": "node scripts/build-student-web.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -16,7 +13,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "axios": "^1.19.0",
     "lucide-react": "^1.28.0",
-    "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hot-toast": "^2.6.0",

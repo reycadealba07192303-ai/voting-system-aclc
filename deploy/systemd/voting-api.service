@@ -1,0 +1,39 @@
+# SSG Voting System backend.
+# Install: /etc/systemd/system/voting-api.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now voting-api
+#
+# server.js calls dotenv.config(), so every secret lives in
+# /opt/voting/app/backend/.env — deliberately NOT an EnvironmentFile, to avoid
+# systemd and dotenv disagreeing about quoting.
+
+[Unit]
+Description=SSG Voting System API
+# The database is MongoDB Atlas, so the only hard dependency is working
+# outbound networking — there is no local mongod to wait for.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=voting
+Group=voting
+WorkingDirectory=/opt/voting/app/backend
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node server.js
+
+Restart=always
+RestartSec=5
+
+# Hardening. uploads/ is the only path the app must be able to write.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/voting/app/backend/uploads
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=voting-api
+
+[Install]
+WantedBy=multi-user.target

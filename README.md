@@ -1,6 +1,6 @@
 # SSG Student Election System
 
-End-to-end documentation for the school SSG voting platform: **admin web**, **student mobile**, and **backend API**.
+End-to-end documentation for the school SSG voting platform: one **React website** carrying both the admin console and the student portal, plus the **backend API**.
 
 ---
 
@@ -13,7 +13,7 @@ End-to-end documentation for the school SSG voting platform: **admin web**, **st
 5. [Quick start](#5-quick-start)
 6. [Backend API](#6-backend-api)
 7. [Admin web](#7-admin-web)
-8. [Student mobile](#8-student-mobile)
+8. [Student portal](#8-student-portal)
 9. [End-to-end election flow](#9-end-to-end-election-flow)
 10. [Live auto-sync](#10-live-auto-sync)
 11. [Security](#11-security)
@@ -28,25 +28,29 @@ A three-part voting system for student government elections:
 
 | App | Who uses it | Role |
 |-----|-------------|------|
-| **Admin web** | Election officers / admins | Create elections, manage students & candidates, open/close voting, view live results & audit logs |
-| **Student mobile** | Students | Sign in with student ID, browse candidates, cast one ballot, see receipt & live standings |
+| **Admin console** | Election officers / admins | Create elections, manage students & candidates, open/close voting, view live results & audit logs |
+| **Student portal** | Students | Sign in with student ID, browse candidates, cast one ballot, see receipt & live standings |
 | **Backend** | Shared API | Auth, business rules, MongoDB storage, vote integrity |
 
-Students do **not** self-register. Admins add student records first; each student creates a password on first mobile login.
+Both front ends are the **same React app** on the same origin — `/dashboard…` for admins, `/student-login` and `/student/*` for students. There is no separate mobile app to install.
+
+Students do **not** self-register. Admins add student records first; each student creates a password on first sign-in.
 
 ---
 
 ## 2. Architecture
 
 ```
-┌─────────────────────┐       ┌──────────────────────┐
-│  Admin Web          │       │  Student Mobile      │
-│  React + Vite       │       │  Flutter             │
-│  localhost:5173/74  │       │  Android / iOS       │
-└──────────┬──────────┘       └──────────┬───────────┘
-           │  HTTPS/HTTP JSON            │
-           │  Bearer JWT (admin)         │  Bearer JWT (student)
-           └──────────────┬──────────────┘
+┌─────────────────────────────────────────────────┐
+│  One React + Vite site — localhost:5173          │
+│  ┌───────────────────┐  ┌────────────────────┐   │
+│  │ Admin console     │  │ Student portal     │   │
+│  │ /dashboard …      │  │ /student-login,    │   │
+│  │                   │  │ /student/*         │   │
+│  └─────────┬─────────┘  └─────────┬──────────┘   │
+└────────────┼──────────────────────┼──────────────┘
+             │  Bearer JWT (admin)  │  Bearer JWT (student)
+             └──────────┬───────────┘
                           ▼
                  ┌─────────────────┐
                  │  Backend API    │
@@ -76,8 +80,8 @@ Students do **not** self-register. Admins add student records first; each studen
 ```
 voting system/
 ├── backend/                 # Node.js + Express + MongoDB API
-├── admin-web/               # React admin panel
-├── student-mobile/          # Flutter student app
+├── admin-web/               # React site — admin console + student portal
+│   └── src/student/         # Student portal (routes, pages, styles)
 ├── docs/                    # Extra documentation
 │   ├── security-and-admin-registration.md
 │   └── progress/            # Day-by-day build notes
@@ -90,8 +94,7 @@ voting system/
 
 - **Node.js** 18+ (backend + admin-web)
 - **MongoDB** running locally (or a remote URI)
-- **Flutter** 3.x (student-mobile)
-- Android emulator / device, or iOS simulator
+- A modern browser — that is the whole student client
 
 ---
 
@@ -120,22 +123,14 @@ npm run dev
 # → http://localhost:5173 (or 5174 if 5173 is busy)
 ```
 
-Create an admin at **`/register`**, or sign in at **`/login`**.
+Create an admin at **`/register`**, or sign in at **`/admin-login`**.
 
-### 5.3 Student mobile
+### 5.3 Student portal
 
-```bash
-cd student-mobile
-flutter pub get
+Same dev server, no second command. Open **`/student-login`** and sign in with a
+student ID an admin has already added.
 
-# Android emulator (default API → 10.0.2.2:5000)
-flutter run
-
-# Physical device — use your PC's LAN IP
-flutter run --dart-define=API_BASE_URL=http://192.168.x.x:5000/api
-```
-
-Keep the backend running whenever you use admin-web or the mobile app.
+Keep the backend running whenever you use the site.
 
 ---
 
@@ -161,7 +156,7 @@ Express 5 · MongoDB/Mongoose · JWT · bcrypt · Helmet · CORS · rate limits 
 | Role | Middleware | Used by |
 |------|------------|---------|
 | `admin` | `adminOnly` | Admin web |
-| `student` | `studentOnly` | Student mobile |
+| `student` | `studentOnly` | Student portal |
 
 A student JWT **cannot** call admin routes (returns `403 Admin access required`).
 
@@ -236,51 +231,45 @@ React 19 · Vite · React Router · Tailwind CSS 4 · Axios · Recharts · Lucid
 
 ---
 
-## 8. Student mobile
+## 8. Student portal
 
 ### Stack
 
-Flutter · go_router · Provider · http · flutter_secure_storage · google_fonts
+React 19 · React Router · axios · lucide-react · a scoped stylesheet (`src/student/styles/student.css`)
 
 ### Screens / routes
 
 | Path | Screen |
 |------|--------|
-| `/login` | Enter student ID → lookup → login or create password |
-| `/set-password` | First-time password (min 8 characters) |
-| `/home` | Active election + **live standings** |
-| `/candidates` | Browse by team/partylist |
-| `/candidates/:id` | Candidate detail |
-| `/voting` | Ballot (one pick per position; skippable) |
-| `/confirmation` | Vote receipt |
-| `/profile` | Account + view own votes |
+| `/student-login` | Enter student ID → lookup → sign in, or create a password |
+| `/student/home` | Active election + **live standings** |
+| `/student/candidates` | Browse by partylist, or search |
+| `/student/candidates/:id` | Candidate detail (platform, biodata) |
+| `/student/vote` | Ballot wizard — one position per step; abstain allowed |
+| `/student/confirmation` | Submission success |
+| `/student/profile` | Account + voting status + logout |
 
-Bottom navigation: **Home · Candidates · Vote · Profile**.
+Navigation: bottom tab bar on phones, inline top nav from 860px up —
+**Home · Candidates · Vote · Profile**. Once a student has voted, `/student/vote`
+becomes their receipt: the ballot they cast plus the live tally with their own
+picks marked.
 
 ### Auth flow (ID-first)
 
-1. Student enters **student ID** (must already exist in admin student list).  
-2. App calls `POST /api/auth/student/lookup`.  
-3. If no password yet → **Create password**.  
-4. If password exists → **Sign in**.  
-5. JWT stored in **secure storage** (not plain SharedPreferences).
+1. Student enters **student ID** (must already exist in the admin student list).
+2. The site calls `POST /api/auth/student/lookup`.
+3. If no password yet → **Create password**.
+4. If a password exists → **Sign in**.
+5. JWT is kept in `localStorage` under `student_token`, separate from the admin
+   session, and a 401 sends the student back to `/student-login`.
 
 Admin can **reset password** from the Students page so the student can create a new one.
 
 ### API config
 
-```dart
-// lib/services/api_client.dart
-API_BASE_URL default: http://10.0.2.2:5000/api   // Android emulator → host machine
-```
-
-Override:
-
-```bash
-flutter run --dart-define=API_BASE_URL=http://YOUR_IP:5000/api
-```
-
-Photos use the same host with `/api` stripped (e.g. `http://10.0.2.2:5000/uploads/...`).
+`admin-web/src/student/api/client.js` reads `VITE_API_URL` (default
+`http://localhost:5000/api`) and derives the photo origin by stripping `/api`,
+so candidate photos resolve to `http://localhost:5000/uploads/…`.
 
 ---
 
@@ -321,7 +310,7 @@ Both clients refresh results without a full page reload:
 | Client | Interval | Behavior |
 |--------|----------|----------|
 | Admin web | ~8s (audit logs ~12s) | `useAutoSync` — pauses when the browser tab is hidden |
-| Student mobile | ~8s | Home timer + sync on app resume |
+| Student portal | ~8s | Poll while the tab is visible, plus a sync on tab focus |
 
 Admin also shows live badges on dashboard / election detail / results.
 
@@ -339,7 +328,6 @@ High-level controls already in the codebase:
 - Ballot secrecy for admins (aggregates only)
 
 **Detailed write-up:** [`docs/security-and-admin-registration.md`](docs/security-and-admin-registration.md)  
-**Checklist:** [`student-mobile/security-hardening-checklist.md`](student-mobile/security-hardening-checklist.md)
 
 **Production tips**
 
@@ -368,7 +356,6 @@ High-level controls already in the codebase:
 | Document | Contents |
 |----------|----------|
 | [`docs/security-and-admin-registration.md`](docs/security-and-admin-registration.md) | Security hardening + admin registration API/UI |
-| [`student-mobile/security-hardening-checklist.md`](student-mobile/security-hardening-checklist.md) | Security checklist status |
 | [`docs/progress/day1-foundation.md`](docs/progress/day1-foundation.md) | Early backend notes |
 | [`docs/progress/day2-admin-web.md`](docs/progress/day2-admin-web.md) | Admin web build notes |
 | [`docs/progress/day3-vote-api.md`](docs/progress/day3-vote-api.md) | Vote API notes |

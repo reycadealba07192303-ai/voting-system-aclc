@@ -1,0 +1,8 @@
+{
+  "installCommand": "npm install --prefix admin-web",
+  "buildCommand": "npm run build --prefix admin-web",
+  "outputDirectory": "admin-web/dist",
+  "rewrites": [
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}

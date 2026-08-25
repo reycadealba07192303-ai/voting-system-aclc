@@ -14,7 +14,7 @@ async function requireAdminPassword(req, res, next) {
     const admin = await Admin.findById(req.user.id)
     if (!admin) return res.status(404).json({ message: 'Admin not found' })
 
-    const match = await admin.comparePassword(password)
+    const match = await admin.comparePassword(password) 
     if (!match) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }

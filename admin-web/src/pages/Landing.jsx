@@ -16,8 +16,8 @@ import {
   Trophy,
   Vote,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { ACLC_LOGO, BRAND } from '../constants/branding'
-import { STUDENT_PORTAL_URL } from '../constants/app'
 import '../styles/landing.css'
 
 function useReveal() {
@@ -507,15 +507,15 @@ export default function Landing() {
               </h1>
               <p className="mt-5 max-w-xl text-blue-100 text-base leading-relaxed">
                 The official Supreme Student Government election platform of{' '}
-                <span className="text-white font-semibold">{BRAND.name}</span>. Same student
-                experience as mobile — splash, onboarding, then a verified ballot.
+                <span className="text-white font-semibold">{BRAND.name}</span>. One site for
+                everything — sign in with your student ID, then cast a verified ballot.
               </p>
               <p className="mt-3 text-blue-200/90 text-sm">Your voice. Your vote. Your school.</p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href={STUDENT_PORTAL_URL} className="ld-btn ld-btn-accent">
+                <Link to="/student-login" className="ld-btn ld-btn-accent">
                   <Vote size={16} />
                   Vote now
-                </a>
+                </Link>
                 <a href="#how-it-works" className="ld-btn ld-btn-ghost">
                   <ScanLine size={16} />
                   How it works
@@ -618,11 +618,11 @@ export default function Landing() {
             <div className="absolute top-0 inset-x-0 h-1" style={{ background: '#ff4b3a' }} />
             <p className="text-blue-100 text-xs font-extrabold tracking-[0.16em] uppercase">Ready</p>
             <h2 className="mt-3 text-white text-3xl md:text-4xl font-extrabold">Your ballot is waiting</h2>
-            <p className="mt-3 text-blue-100">Same portal as mobile — splash, onboarding, then your student ID.</p>
-            <a href={STUDENT_PORTAL_URL} className="ld-btn ld-btn-accent mt-8">
+            <p className="mt-3 text-blue-100">Sign in with your student ID and vote right here in your browser.</p>
+            <Link to="/student-login" className="ld-btn ld-btn-accent mt-8">
               <Vote size={16} />
               Vote now
-            </a>
+            </Link>
           </div>
         </div>
       </section>

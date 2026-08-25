@@ -353,8 +353,8 @@ export default function Elections() {
           <div>
             <label className={labelCls}>Audience levels</label>
             <p className="text-xs text-slate-600 mb-2">
-              Tick a level, then open it and check the sections that can see this election.
-              Those ticked sections are the audience — no extra pick when adding candidates.
+              Open the picker and tick the year levels, then expand a level to choose its
+              sections. Ticked sections are the audience — no extra pick when adding candidates.
             </p>
             <LevelAudiencePicker
               levels={form.audience_levels || []}

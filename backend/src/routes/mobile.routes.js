@@ -166,6 +166,59 @@ router.get('/vote-status/:electionId', studentOnly, async (req, res) => {
   }
 })
 
+// GET campus-wide live standings — every ongoing/closed election, all levels.
+// Unlike /election/active, this is not limited to the signed-in student's audience.
+router.get('/standings/campus', studentOnly, async (req, res) => {
+  try {
+    const elections = await Election.find({
+      $or: [{ status: 'ongoing' }, { status: 'closed' }],
+    })
+      .sort({ created_at: -1 })
+      .lean()
+
+    const statusRank = { ongoing: 0, closed: 1 }
+    const payload = await Promise.all(
+      elections.map(async (election) => {
+        const electionId = election._id
+        const [positions, candidates, votes, voterIds] = await Promise.all([
+          Position.find({ election_id: electionId }),
+          Candidate.find({ election_id: electionId }).select(
+            'name photo_url partylist position_id'
+          ),
+          Vote.find({ election_id: electionId }),
+          Vote.distinct('student_id', { election_id: electionId }),
+        ])
+
+        return {
+          _id: election._id,
+          title: election.title,
+          status: election.status,
+          audience_levels: election.audience_levels || [],
+          start_date: election.start_date,
+          end_date: election.end_date,
+          total_ballots: voterIds.length,
+          positions: buildElectionResults(
+            positions,
+            candidates,
+            votes,
+            voterIds.length
+          ),
+        }
+      })
+    )
+
+    payload.sort((a, b) => {
+      const byStatus = (statusRank[a.status] ?? 9) - (statusRank[b.status] ?? 9)
+      if (byStatus !== 0) return byStatus
+      return String(a.title || '').localeCompare(String(b.title || ''))
+    })
+
+    res.json(payload)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 // GET live standings for an election (student-facing)
 router.get('/election/:electionId/results', studentOnly, async (req, res) => {
   try {
