@@ -32,7 +32,7 @@ const upload = multer({
 router.get('/', adminOnly, async (req, res) => {
   try {
     const candidates = await Candidate.find({ election_id: req.params.electionId })
-      .populate('position_id', 'title')
+      .populate('position_id', 'title is_section_based')
       .sort({ name: 1 })
     res.json(candidates)
   } catch (err) {
@@ -43,7 +43,7 @@ router.get('/', adminOnly, async (req, res) => {
 // POST create candidate
 router.post('/', adminOnly, upload.single('photo'), async (req, res) => {
   try {
-    const { name, position_id, partylist, platform, biodata } = req.body
+    const { name, position_id, partylist, platform, biodata, section } = req.body
     if (!name || !position_id) {
       return res.status(400).json({ message: 'Name and position are required' })
     }
@@ -56,6 +56,7 @@ router.post('/', adminOnly, upload.single('photo'), async (req, res) => {
       partylist,
       platform,
       biodata,
+      section: section ? String(section).trim() : '',
     })
     await logAction(req.user.id, 'create_candidate', `Added candidate: ${name}`)
     res.status(201).json(candidate)
@@ -67,13 +68,17 @@ router.post('/', adminOnly, upload.single('photo'), async (req, res) => {
 // PUT update candidate
 router.put('/:candidateId', adminOnly, upload.single('photo'), async (req, res) => {
   try {
-    const updates = { ...req.body }
+    const updates = {}
+    for (const key of ['name', 'position_id', 'partylist', 'platform', 'biodata', 'section']) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key]
+    }
+    if (updates.section !== undefined) updates.section = String(updates.section || '').trim()
     if (req.file) updates.photo_url = `/uploads/candidates/${req.file.filename}`
     const candidate = await Candidate.findOneAndUpdate(
       { _id: req.params.candidateId, election_id: req.params.electionId },
       { $set: updates },
       { new: true }
-    ).populate('position_id', 'title')
+    ).populate('position_id', 'title is_section_based')
     if (!candidate) return res.status(404).json({ message: 'Candidate not found' })
     await logAction(req.user.id, 'update_candidate', `Updated candidate: ${candidate.name}`)
     res.json(candidate)

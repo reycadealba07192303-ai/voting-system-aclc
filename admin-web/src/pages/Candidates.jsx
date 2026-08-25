@@ -13,6 +13,11 @@ import SelectDropdown from '../components/ui/SelectDropdown'
 const EMPTY_FORM = { name: '', partylist: '', platform: '', position_id: '' }
 const labelCls   = 'block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2'
 
+function isSectionBased(pos) {
+  if (!pos) return false
+  return pos.is_section_based === true || /represent/i.test(pos.title || '')
+}
+
 export default function Candidates() {
   const [elections, setElections]         = useState([])
   const [selectedElection, setSelected]   = useState('')
@@ -54,7 +59,12 @@ export default function Candidates() {
   const openModal = (positionId, candidate = null) => {
     setEditing(candidate)
     setForm(candidate
-      ? { name: candidate.name, partylist: candidate.partylist || '', platform: candidate.platform || '', position_id: candidate.position_id?._id || candidate.position_id || positionId }
+      ? {
+          name: candidate.name,
+          partylist: candidate.partylist || '',
+          platform: candidate.platform || '',
+          position_id: candidate.position_id?._id || candidate.position_id || positionId,
+        }
       : { ...EMPTY_FORM, position_id: positionId })
     setPhotoFile(null)
     setModalOpen(true)
@@ -69,7 +79,7 @@ export default function Candidates() {
     setSaving(true)
     try {
       const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v ?? ''))
       if (photoFile) fd.append('photo', photoFile)
       editing
         ? await updateCandidate(selectedElection, editing._id, fd)
@@ -133,7 +143,14 @@ export default function Candidates() {
                     <UserSquare2 size={15} style={{ color: '#93c5fd' }} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-white text-sm">{pos.title}</p>
+                    <p className="font-semibold text-white text-sm">
+                      {pos.title}
+                      {isSectionBased(pos) && (
+                        <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-amber-300">
+                          by section
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-slate-500 mt-0.5">
                       {posCandidates.length} candidate{posCandidates.length !== 1 ? 's' : ''} · max {pos.max_winners} winner{pos.max_winners !== 1 ? 's' : ''}
                     </p>
@@ -215,7 +232,10 @@ export default function Candidates() {
             <SelectDropdown
               options={[
                 { value: '', label: 'Select position' },
-                ...positions.map((p) => ({ value: p._id, label: p.title })),
+                ...positions.map((p) => ({
+                  value: p._id,
+                  label: isSectionBased(p) ? `${p.title} (by section)` : p.title,
+                })),
               ]}
               value={form.position_id}
               onChange={(position_id) => setForm({ ...form, position_id })}
@@ -228,8 +248,18 @@ export default function Candidates() {
           </div>
           <div>
             <label className={labelCls}>Partylist / Team</label>
-            <input value={form.partylist} onChange={(e) => setForm({ ...form, partylist: e.target.value })}
-              className="input-dark" placeholder="e.g. Team Unity" />
+            <input
+              list="partylist-options"
+              value={form.partylist}
+              onChange={(e) => setForm({ ...form, partylist: e.target.value })}
+              className="input-dark"
+              placeholder="e.g. Team Unity"
+            />
+            <datalist id="partylist-options">
+              {Array.from(new Set(candidates.map(c => c.partylist).filter(Boolean))).map(p => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
           </div>
           <div>
             <label className={labelCls}>Platform</label>

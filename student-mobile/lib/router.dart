@@ -20,15 +20,21 @@ GoRouter createAppRouter(AuthService auth) {
     redirect: (context, state) {
       final isLoggedIn = auth.isLoggedIn;
       final loc = state.matchedLocation;
-      const publicRoutes = ['/', '/onboarding', '/login', '/set-password'];
+      const publicRoutes = [
+        '/',
+        '/onboarding',
+        '/login',
+        '/student-login',
+        '/set-password',
+      ];
 
       if (publicRoutes.contains(loc)) return null;
 
       if (!isLoggedIn) {
-        return '/login';
+        return '/student-login';
       }
 
-      if (isLoggedIn && loc == '/login') {
+      if (isLoggedIn && (loc == '/login' || loc == '/student-login')) {
         return '/home';
       }
 
@@ -45,6 +51,10 @@ GoRouter createAppRouter(AuthService auth) {
       ),
       GoRoute(
         path: '/login',
+        redirect: (_, __) => '/student-login',
+      ),
+      GoRoute(
+        path: '/student-login',
         builder: (_, __) => const LoginScreen(),
       ),
       GoRoute(

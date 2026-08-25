@@ -34,6 +34,37 @@ router.get('/', adminOnly, async (req, res) => {
   }
 })
 
+// GET distinct sections grouped by year level (for election audience picker)
+router.get('/sections-by-level', adminOnly, async (req, res) => {
+  try {
+    const rows = await Student.aggregate([
+      {
+        $match: {
+          section: { $exists: true, $nin: [null, ''] },
+          level: { $exists: true, $nin: [null, ''] },
+        },
+      },
+      {
+        $group: {
+          _id: { level: '$level', section: '$section' },
+        },
+      },
+      { $sort: { '_id.section': 1 } },
+    ])
+    const byLevel = {}
+    for (const row of rows) {
+      const level = row._id.level
+      const section = String(row._id.section || '').trim()
+      if (!level || !section) continue
+      if (!byLevel[level]) byLevel[level] = []
+      if (!byLevel[level].includes(section)) byLevel[level].push(section)
+    }
+    res.json(byLevel)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 // POST create student (no password — student creates it in the app)
 router.post('/', adminOnly, async (req, res) => {
   try {

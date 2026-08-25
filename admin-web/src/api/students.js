@@ -10,6 +10,8 @@ export const resetStudentPassword = (id) =>
 /** View-only ballot — available after the election is closed. */
 export const getStudentBallot = (id) => api.get(`/students/${id}/ballot`)
 
+export const getSectionsByLevel = () => api.get('/students/sections-by-level')
+
 /** Import CSV or Excel. Pass `section`/`level` to force values for 2-column files. */
 export const importStudents = (file, section, level) => {
   const form = new FormData()

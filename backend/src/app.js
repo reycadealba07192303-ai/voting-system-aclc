@@ -1,7 +1,6 @@
 const express    = require('express')
 const cors       = require('cors')
 const helmet     = require('helmet')
-const rateLimit  = require('express-rate-limit')
 const mongoSanitize = require('express-mongo-sanitize')
 const path       = require('path')
 const errorHandler = require('./middleware/errorHandler')
@@ -14,16 +13,33 @@ app.use(helmet({
 }))
 
 // ── CORS — only allow the admin web and mobile origin ────────────────────────
+const IS_PROD = process.env.NODE_ENV === 'production'
+
 const ALLOWED_ORIGINS = (
   process.env.ALLOWED_ORIGINS ||
-  'http://localhost:5173,http://localhost:5174'
+  // 5173/5174 = admin-web (Vite), 8080 = student portal (Flutter web)
+  'http://localhost:5173,http://localhost:5174,http://localhost:8080,http://127.0.0.1:5173,http://127.0.0.1:8080'
 ).split(',').map((o) => o.trim()).filter(Boolean)
+
+// Outside production, also accept localhost and the same apps served over the
+// LAN, so testing on a phone does not need a redeploy every time the machine's
+// IP changes — and a stale ALLOWED_ORIGINS does not break local development.
+const LAN_ORIGIN =
+  /^https?:\/\/(?:localhost|(?:10\.|127\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)[\d.]+)(?::\d+)?$/
+
+function isAllowedOrigin(origin) {
+  if (ALLOWED_ORIGINS.includes(origin)) return true
+  return !IS_PROD && LAN_ORIGIN.test(origin)
+}
 
 app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (Postman, mobile apps, same-origin)
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true)
-    cb(new Error(`CORS: origin ${origin} not allowed`))
+    if (!origin || isAllowedOrigin(origin)) return cb(null, true)
+    // Deny without throwing: the browser still gets a clean CORS rejection
+    // instead of a 500 that hides the real reason on the preflight.
+    console.warn(`CORS: blocked origin ${origin}`)
+    cb(null, false)
   },
   credentials: true,
 }))
@@ -48,35 +64,6 @@ app.use((req, _res, next) => {
   })
   next()
 })
-
-// ── Rate limiting ─────────────────────────────────────────────────────────────
-const loginLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 10,
-  message: { message: 'Too many login attempts. Please try again in 5 minutes.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
-
-const voteLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { message: 'Too many vote requests. Please wait before trying again.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
-
-const generalLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 300,
-  message: { message: 'Too many requests. Slow down.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
-
-app.use('/api/', generalLimiter)
-app.use('/api/auth', loginLimiter)
-app.use('/api/votes', voteLimiter)
 
 // ── Static file serving ───────────────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))

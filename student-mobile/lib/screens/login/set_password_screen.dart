@@ -65,7 +65,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
-                onPressed: () => context.go('/login'),
+                onPressed: () => context.go('/student-login'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: const Icon(Icons.arrow_back_ios_new_rounded,

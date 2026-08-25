@@ -10,11 +10,18 @@ import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
 import Modal from '../components/ui/Modal'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import LevelMultiSelect from '../components/ui/LevelMultiSelect'
+import LevelAudiencePicker from '../components/ui/LevelAudiencePicker'
 import { labelForLevel } from '../constants/levels'
 
-const EMPTY_FORM = { title: '', description: '', start_date: '', end_date: '', audience_levels: [] }
-const EMPTY_POS  = { title: '', max_winners: 1 }
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  start_date: '',
+  end_date: '',
+  audience_levels: [],
+  audience_sections: {},
+}
+const EMPTY_POS = { title: '', max_winners: 1, is_section_based: false }
 const labelCls   = 'block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2'
 
 export default function Elections() {
@@ -76,8 +83,9 @@ export default function Elections() {
           start_date: election.start_date?.slice(0, 10) || '',
           end_date: election.end_date?.slice(0, 10) || '',
           audience_levels: election.audience_levels || [],
+          audience_sections: election.audience_sections || {},
         }
-      : { ...EMPTY_FORM, audience_levels: [] })
+      : { ...EMPTY_FORM, audience_levels: [], audience_sections: {} })
     setModalOpen(true)
   }
 
@@ -114,7 +122,16 @@ export default function Elections() {
 
   const openPosModal = (elId, position = null) => {
     setPosEditing(position ? { ...position, electionId: elId } : { electionId: elId })
-    setPosForm(position ? { title: position.title, max_winners: position.max_winners } : EMPTY_POS)
+    setPosForm(
+      position
+        ? {
+            title: position.title,
+            max_winners: position.max_winners,
+            is_section_based:
+              position.is_section_based === true || /represent/i.test(position.title || ''),
+          }
+        : EMPTY_POS
+    )
     setPosModal(true)
   }
 
@@ -200,6 +217,12 @@ export default function Elections() {
                             }}
                           >
                             {labelForLevel(lv)}
+                            {(el.audience_sections?.[lv] || []).length > 0 && (
+                              <span className="opacity-70">
+                                {' '}
+                                · {el.audience_sections[lv].length} sec
+                              </span>
+                            )}
                           </span>
                         ))}
                       </div>
@@ -222,7 +245,7 @@ export default function Elections() {
                       {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                     </button>
 
-                    {el.status === 'draft' && (
+                    {(el.status === 'draft' || el.status === 'closed') && (
                       <button onClick={() => handleOpen(el._id)} title="Open election"
                         className="p-2 rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition-colors">
                         <PlayCircle size={17} />
@@ -272,7 +295,14 @@ export default function Elections() {
                               style={{ background: 'rgba(35,51,180,0.2)', color: '#93c5fd' }}>
                               {idx + 1}
                             </span>
-                            <span className="flex-1 text-sm text-slate-200 font-medium">{pos.title}</span>
+                            <span className="flex-1 text-sm text-slate-200 font-medium">
+                              {pos.title}
+                              {(pos.is_section_based || /represent/i.test(pos.title || '')) && (
+                                <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-amber-300">
+                                  by section
+                                </span>
+                              )}
+                            </span>
                             <span className="text-xs text-slate-600 mr-2">
                               {pos.max_winners === 1 ? '1 winner' : `${pos.max_winners} winners`}
                             </span>
@@ -323,12 +353,15 @@ export default function Elections() {
           <div>
             <label className={labelCls}>Audience levels</label>
             <p className="text-xs text-slate-600 mb-2">
-              Open the dropdown and check the levels that can see this election (Grade 7–12 and College 1st–5th Year).
+              Tick a level, then open it and check the sections that can see this election.
+              Those ticked sections are the audience — no extra pick when adding candidates.
             </p>
-            <LevelMultiSelect
-              value={form.audience_levels || []}
-              onChange={(audience_levels) => setForm({ ...form, audience_levels })}
-              placeholder="Select levels…"
+            <LevelAudiencePicker
+              levels={form.audience_levels || []}
+              sections={form.audience_sections || {}}
+              onChange={({ audience_levels, audience_sections }) =>
+                setForm({ ...form, audience_levels, audience_sections })
+              }
             />
           </div>
           <div className="flex justify-end gap-3 pt-2">
@@ -344,8 +377,20 @@ export default function Elections() {
         <form onSubmit={handlePosSave} className="space-y-4">
           <div>
             <label className={labelCls}>Position Title</label>
-            <input required value={posForm.title} onChange={(e) => setPosForm({ ...posForm, title: e.target.value })}
-              className="input-dark" placeholder="e.g. President, Secretary…" />
+            <input
+              required
+              value={posForm.title}
+              onChange={(e) => {
+                const title = e.target.value
+                setPosForm({
+                  ...posForm,
+                  title,
+                  is_section_based: /represent/i.test(title) ? true : posForm.is_section_based,
+                })
+              }}
+              className="input-dark"
+              placeholder="e.g. President, Representative…"
+            />
           </div>
           <div>
             <label className={labelCls}>Max Winners</label>
@@ -354,6 +399,20 @@ export default function Elections() {
               className="input-dark" />
             <p className="text-xs text-slate-600 mt-1">Set to 1 for single winner, higher for multi-winner positions (e.g. Senators).</p>
           </div>
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              className="mt-0.5 rounded border-slate-600"
+              checked={!!posForm.is_section_based}
+              onChange={(e) => setPosForm({ ...posForm, is_section_based: e.target.checked })}
+            />
+            <span>
+              <span className="block text-sm text-slate-200 font-medium">Representative — section audience</span>
+              <span className="block text-xs text-slate-500 mt-0.5">
+                Only the sections ticked on this election can see this race. No need to pick a section per candidate.
+              </span>
+            </span>
+          </label>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setPosModal(false)} className="btn-ghost" style={{ padding: '9px 16px' }}>Cancel</button>
             <button type="submit" disabled={posSaving} className="btn-primary" style={{ padding: '9px 16px' }}>

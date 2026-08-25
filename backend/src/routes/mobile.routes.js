@@ -9,7 +9,7 @@ const Candidate = require('../models/Candidate')
 const Vote = require('../models/Vote')
 const Student = require('../models/Student')
 const { studentOnly } = require('../middleware/auth')
-const { studentCanAccessElection } = require('../constants/levels')
+const { studentInAudience, isSectionBasedPosition } = require('../utils/audience')
 const { buildElectionResults } = require('../utils/electionResults')
 
 async function loadStudentLevel(req) {
@@ -23,18 +23,18 @@ async function assertElectionAccess(req, electionId) {
     Election.findById(electionId),
   ])
   if (!election) return { error: { status: 404, message: 'Election not found' } }
-  if (!studentCanAccessElection(student?.level, election.audience_levels)) {
+  if (!studentInAudience(student, election)) {
     return {
       error: {
         status: 403,
-        message: 'This election is not available for your level',
+        message: 'This election is not available for your year level or section',
       },
     }
   }
   return { student, election }
 }
 
-// GET active election for this student's level
+// GET current election for this student's level (ongoing, else latest closed for final tallies)
 router.get('/election/active', studentOnly, async (req, res) => {
   try {
     const student = await loadStudentLevel(req)
@@ -42,10 +42,24 @@ router.get('/election/active', studentOnly, async (req, res) => {
       return res.json(null)
     }
 
-    const election = await Election.findOne({
+    const pickForStudent = (list) =>
+      list.find((election) => studentInAudience(student, election)) || null
+
+    const ongoing = await Election.find({
       status: 'ongoing',
       audience_levels: student.level,
     }).sort({ created_at: -1 })
+
+    let election = pickForStudent(ongoing)
+
+    // Keep final standings visible after voting closes
+    if (!election) {
+      const closed = await Election.find({
+        status: 'closed',
+        audience_levels: student.level,
+      }).sort({ created_at: -1 })
+      election = pickForStudent(closed)
+    }
 
     if (!election) return res.json(null)
     res.json(election)
@@ -62,7 +76,7 @@ router.get('/election/:electionId/ballot', studentOnly, async (req, res) => {
 
     const positions = await Position.find({ election_id: req.params.electionId }).lean()
     const candidates = await Candidate.find({ election_id: req.params.electionId })
-      .select('name photo_url partylist platform biodata position_id')
+      .select('name photo_url partylist platform biodata position_id section')
       .lean()
 
     const ballot = positions.map((pos) => {
@@ -71,6 +85,7 @@ router.get('/election/:electionId/ballot', studentOnly, async (req, res) => {
         _id: pos._id,
         title: pos.title,
         max_winners: pos.max_winners,
+        is_section_based: isSectionBasedPosition(pos),
         candidates: candidates.filter(
           (c) => c.position_id && c.position_id.toString() === posId
         ),

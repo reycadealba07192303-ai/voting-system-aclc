@@ -36,7 +36,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     logout()
     toast.success('Logged out')
-    navigate('/login')
+    navigate('/admin-login')
   }
 
   const handleChangePassword = async (e) => {

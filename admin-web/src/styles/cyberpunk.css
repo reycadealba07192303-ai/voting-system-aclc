@@ -1,0 +1,559 @@
+/* ==========================================================================
+   Cyberpunk / Synthwave design layer — scoped to the public landing page.
+   Everything lives under .cp so the admin panel styling stays untouched.
+   ========================================================================== */
+
+/* Everything below sits in Tailwind's `components` layer so plain Tailwind
+   utilities (hidden, text-*, p-*) still win over these class defaults. */
+@layer components {
+  .cp {
+    --cp-bg: #06010f;
+    --cp-bg-2: #0d0320;
+    --cp-panel: rgba(18, 6, 40, 0.72);
+    --cp-cyan: #00f0ff;
+    --cp-magenta: #ff2d95;
+    --cp-purple: #8b5cf6;
+    --cp-violet: #6d28d9;
+    --cp-amber: #ffd23f;
+    --cp-text: #eae6ff;
+    --cp-muted: #9d92c4;
+    --cp-dim: #6b6191;
+    --cp-line: rgba(0, 240, 255, 0.32);
+    --cp-line-hot: rgba(255, 45, 149, 0.5);
+    --cp-display: 'Orbitron', 'Chakra Petch', system-ui, sans-serif;
+    --cp-body: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+    --cp-mono: 'Share Tech Mono', ui-monospace, 'Courier New', monospace;
+
+    position: relative;
+    min-height: 100vh;
+    background: var(--cp-bg);
+    color: var(--cp-text);
+    font-family: var(--cp-body);
+    overflow-x: clip;
+  }
+
+  .cp ::selection {
+    background: var(--cp-magenta);
+    color: #0b0118;
+  }
+
+  /* Anchored sections must clear the fixed 68px header */
+  .cp [id] {
+    scroll-margin-top: 104px;
+  }
+
+  /* --------------------------------------------------------------- typography */
+
+  .cp-display {
+    font-family: var(--cp-display);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .cp-kicker {
+    font-family: var(--cp-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--cp-cyan);
+  }
+
+  .cp-mono {
+    font-family: var(--cp-mono);
+    letter-spacing: 0.08em;
+  }
+
+  /* Chrome / sunset gradient fill for headlines */
+  .cp-chrome {
+    background: linear-gradient(180deg, #ffffff 6%, #b9e8ff 34%, #ff2d95 68%, #ffd23f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 18px rgba(255, 45, 149, 0.35));
+  }
+
+  .cp-neon-cyan {
+    color: var(--cp-cyan);
+    -webkit-text-fill-color: currentColor;
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.75), 0 0 22px rgba(0, 240, 255, 0.4);
+  }
+
+  .cp-neon-magenta {
+    color: var(--cp-magenta);
+    -webkit-text-fill-color: currentColor;
+    text-shadow: 0 0 6px rgba(255, 45, 149, 0.8), 0 0 24px rgba(255, 45, 149, 0.45);
+  }
+
+  /* Glitch headline — three stacked copies with clipped RGB offsets */
+  .cp-glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .cp-glitch::before,
+  .cp-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--cp-bg);
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .cp-glitch::before {
+    color: var(--cp-cyan);
+    animation: cp-glitch-a 3.4s steps(2, end) infinite;
+  }
+
+  .cp-glitch::after {
+    color: var(--cp-magenta);
+    animation: cp-glitch-b 2.7s steps(2, end) infinite;
+  }
+
+  @keyframes cp-glitch-a {
+    0%, 82%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+    84% { clip-path: inset(8% 0 72% 0); transform: translate(-3px, -1px); }
+    88% { clip-path: inset(48% 0 34% 0); transform: translate(3px, 1px); }
+    92% { clip-path: inset(72% 0 12% 0); transform: translate(-2px, 0); }
+  }
+
+  @keyframes cp-glitch-b {
+    0%, 76%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+    79% { clip-path: inset(26% 0 58% 0); transform: translate(4px, 1px); }
+    85% { clip-path: inset(62% 0 22% 0); transform: translate(-4px, -1px); }
+    90% { clip-path: inset(4% 0 86% 0); transform: translate(2px, 0); }
+  }
+
+  /* ------------------------------------------------------------- backgrounds */
+
+  /* Sun + haze behind the hero */
+  .cp-sun.cp-sun--hero {
+    top: 3.5rem;
+    left: 72%;
+    width: min(560px, 78vw);
+    opacity: 0.72;
+  }
+
+  /* On narrow screens pull it clear of the headline */
+  @media (max-width: 1023px) {
+    .cp-sun.cp-sun--hero {
+      top: 1rem;
+      left: 84%;
+      width: min(340px, 58vw);
+      opacity: 0.45;
+    }
+  }
+
+  .cp-sun {
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+    width: min(620px, 92vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      linear-gradient(180deg, #ffd23f 0%, #ff7ac6 46%, #ff2d95 74%, #7b2ff7 100%);
+    /* horizontal slats over the lower half — the classic synthwave sun.
+       Gaps widen toward the bottom, and the last band fades into the grid. */
+    --cp-sun-slats: linear-gradient(
+      180deg,
+      #000 0 50%,
+      transparent 50% 52.5%,
+      #000 52.5% 60%,
+      transparent 60% 63.5%,
+      #000 63.5% 70%,
+      transparent 70% 74.5%,
+      #000 74.5% 80%,
+      transparent 80% 86%,
+      #000 86% 88%,
+      transparent 88% 100%
+    );
+    -webkit-mask-image: var(--cp-sun-slats);
+    mask-image: var(--cp-sun-slats);
+    filter: blur(0.4px) saturate(1.15);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  /* Perspective grid floor — the plane tilts away from its bottom edge so the
+     lines converge at the element's top, where the horizon line sits. */
+  .cp-grid-floor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 300px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .cp-grid-floor::before {
+    content: '';
+    position: absolute;
+    left: -60%;
+    right: -60%;
+    bottom: 0;
+    height: 190%;
+    background:
+      repeating-linear-gradient(90deg, var(--cp-line) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, var(--cp-line-hot) 0 1px, transparent 1px 72px);
+    transform: perspective(460px) rotateX(60deg);
+    transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(180deg, transparent 46%, #000 62%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 46%, #000 62%, #000 100%);
+    animation: cp-scroll-grid 6s linear infinite;
+  }
+
+  /* Glowing horizon where the grid meets the sky */
+  .cp-grid-floor::after {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 52%;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 45, 149, 1) 32%,
+      rgba(0, 240, 255, 1) 68%,
+      transparent
+    );
+    box-shadow: 0 0 22px 4px rgba(255, 45, 149, 0.45);
+    filter: blur(1px);
+  }
+
+  @keyframes cp-scroll-grid {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 0 0, 0 72px; }
+  }
+
+  /* Static grid used in mid-page sections */
+  .cp-grid-static {
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.055) 1px, transparent 1px);
+    background-size: 54px 54px;
+  }
+
+  .cp-scanlines::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.22) 0 1px,
+      transparent 1px 3px
+    );
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+  }
+
+  .cp-vignette::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    pointer-events: none;
+    background: radial-gradient(125% 95% at 50% 42%, transparent 55%, rgba(3, 0, 10, 0.72) 100%);
+  }
+
+  .cp-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------------ panels */
+
+  /* Notched corners — the cyberpunk HUD frame */
+  .cp-panel {
+    position: relative;
+    background: var(--cp-panel);
+    border: 1px solid rgba(139, 92, 246, 0.32);
+    backdrop-filter: blur(10px);
+    clip-path: polygon(
+      18px 0,
+      100% 0,
+      100% calc(100% - 18px),
+      calc(100% - 18px) 100%,
+      0 100%,
+      0 18px
+    );
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .cp-panel:hover {
+    border-color: rgba(0, 240, 255, 0.6);
+    transform: translateY(-3px);
+    /* inset — an outer shadow would be cut away by the notched clip-path */
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.22),
+      inset 0 0 34px -8px rgba(0, 240, 255, 0.45);
+  }
+
+  .cp-panel-hot {
+    border-color: rgba(255, 45, 149, 0.42);
+  }
+
+  .cp-panel-hot:hover {
+    border-color: rgba(255, 45, 149, 0.8);
+    box-shadow: inset 0 0 0 1px rgba(255, 45, 149, 0.24),
+      inset 0 0 34px -8px rgba(255, 45, 149, 0.5);
+  }
+
+  /* Thin top accent bar for panels */
+  .cp-panel-rail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 18px;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cp-cyan), transparent 70%);
+    opacity: 0.7;
+  }
+
+  .cp-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), rgba(255, 45, 149, 0.4), transparent);
+  }
+
+  /* ----------------------------------------------------------------- buttons */
+
+  .cp-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 26px;
+    font-family: var(--cp-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid transparent;
+    overflow: hidden;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    transition: transform 0.18s ease, box-shadow 0.25s ease, color 0.2s ease, background 0.25s ease;
+  }
+
+  .cp-btn:active {
+    transform: translateY(1px) scale(0.995);
+  }
+
+  /* sweep of light on hover */
+  .cp-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+    translate: -120% 0;
+    transition: translate 0.6s ease;
+  }
+
+  .cp-btn:hover::after {
+    translate: 120% 0;
+  }
+
+  .cp-btn-primary {
+    background: linear-gradient(115deg, var(--cp-magenta), #b026ff 55%, var(--cp-cyan));
+    color: #0a0118;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  }
+
+  .cp-btn-primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12) saturate(1.1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+      inset 0 0 22px -4px rgba(255, 255, 255, 0.55);
+  }
+
+  .cp-btn-ghost {
+    background: rgba(0, 240, 255, 0.06);
+    border-color: rgba(0, 240, 255, 0.45);
+    color: var(--cp-cyan);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  }
+
+  .cp-btn-ghost:hover {
+    background: rgba(0, 240, 255, 0.16);
+    border-color: var(--cp-cyan);
+    transform: translateY(-2px);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.4),
+      inset 0 0 26px -6px rgba(0, 240, 255, 0.55);
+  }
+
+  .cp-link {
+    color: var(--cp-muted);
+    font-family: var(--cp-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+  }
+
+  .cp-link:hover {
+    color: var(--cp-cyan);
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+  }
+
+  /* ------------------------------------------------------------------- chips */
+
+  .cp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-family: var(--cp-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cp-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    background: rgba(0, 240, 255, 0.07);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  .cp-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22ff88;
+    box-shadow: 0 0 0 3px rgba(34, 255, 136, 0.18), 0 0 12px rgba(34, 255, 136, 0.9);
+    animation: cp-pulse 1.9s ease-in-out infinite;
+  }
+
+  @keyframes cp-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* ----------------------------------------------------------------- marquee */
+
+  .cp-marquee {
+    display: flex;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 45, 149, 0.28);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.28);
+    background: linear-gradient(90deg, rgba(255, 45, 149, 0.08), rgba(0, 240, 255, 0.08));
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .cp-marquee-track {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 42px;
+    padding: 12px 21px;
+    animation: cp-marquee 26s linear infinite;
+  }
+
+  @keyframes cp-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* ------------------------------------------------------------ phone mockup */
+
+  .cp-phone {
+    position: relative;
+    width: 272px;
+    border-radius: 34px;
+    padding: 10px;
+    background: linear-gradient(160deg, #2a1150, #0a0118 55%, #1a0733);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    box-shadow:
+      0 0 0 1px rgba(255, 45, 149, 0.25),
+      0 0 60px -12px rgba(139, 92, 246, 0.7),
+      0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  }
+
+  .cp-phone-screen {
+    position: relative;
+    border-radius: 26px;
+    overflow: hidden;
+    background: radial-gradient(120% 80% at 50% 0%, #1b0a3a, #08020f 70%);
+    aspect-ratio: 9 / 19.2;
+  }
+
+  .cp-phone-notch {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    translate: -50% 0;
+    width: 72px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.75);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.2);
+    z-index: 3;
+  }
+
+  /* QR frame with animated corner brackets */
+  .cp-qr-frame {
+    position: relative;
+    padding: 16px;
+    background: #f5f2ff;
+    border-radius: 4px;
+    box-shadow: 0 0 40px -8px rgba(0, 240, 255, 0.65);
+  }
+
+  .cp-qr-bracket {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--cp-cyan);
+  }
+
+  .cp-qr-scan {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cp-magenta), transparent);
+    box-shadow: 0 0 14px 2px rgba(255, 45, 149, 0.8);
+    animation: cp-scan 2.6s ease-in-out infinite;
+  }
+
+  @keyframes cp-scan {
+    0%, 100% { top: 8px; opacity: 0.15; }
+    50% { top: calc(100% - 10px); opacity: 1; }
+  }
+
+  /* --------------------------------------------------------------- reveal-in */
+
+  .cp-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cp-reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* -------------------------------------------------------- reduced motion */
+
+  @media (prefers-reduced-motion: reduce) {
+    .cp *,
+    .cp *::before,
+    .cp *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .cp-reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

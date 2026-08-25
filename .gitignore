@@ -12,6 +12,8 @@ node_modules/
 backend/uploads/
 
 # Build outputs
+# Flutter student portal compiled into the admin site (npm run student:build)
+admin-web/public/student/
 dist/
 dist-ssr/
 build/

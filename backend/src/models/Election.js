@@ -13,6 +13,15 @@ const electionSchema = new mongoose.Schema(
       type: [{ type: String, enum: LEVEL_IDS }],
       default: [],
     },
+    /**
+     * Optional section allow-list per level.
+     * Shape: { grade_11: ['STEM A', 'ABM 1'], college_1: ['BSIT 1A'] }
+     * Missing or empty array for a level = every section in that level.
+     */
+    audience_sections: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 )

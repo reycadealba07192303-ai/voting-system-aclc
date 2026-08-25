@@ -175,7 +175,7 @@ export default function Register() {
 
           <p className="text-sm text-slate-500 text-center mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="font-medium" style={{ color: '#93c5fd' }}>
+            <Link to="/admin-login" className="font-medium" style={{ color: '#93c5fd' }}>
               Sign in
             </Link>
           </p>

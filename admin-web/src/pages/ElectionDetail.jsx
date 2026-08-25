@@ -185,6 +185,12 @@ export default function ElectionDetail() {
                     }}
                   >
                     {labelForLevel(lv)}
+                    {(election.audience_sections?.[lv] || []).length > 0 && (
+                      <span className="opacity-70">
+                        {' '}
+                        · {election.audience_sections[lv].length} sec
+                      </span>
+                    )}
                   </span>
                 ))}
               </div>

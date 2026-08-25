@@ -152,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ? _ElectionStrip(
                               election: election.activeElection!,
                               hasVoted: student?['has_voted'] == true,
+                              isClosed: election.isElectionClosed,
                             )
                           : _NoElectionCard(
                               studentLevel: student?['level'] as String?,
@@ -159,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
 
-              // Live standings — primary home content
+              // Live / final standings — primary home content
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
@@ -167,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     results: election.results,
                     loading: election.resultsLoading,
                     hasElection: election.activeElection != null,
+                    isClosed: election.isElectionClosed,
                   ),
                 ),
               ),
@@ -211,10 +213,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 class _ElectionStrip extends StatelessWidget {
   final Map<String, dynamic> election;
   final bool hasVoted;
-  const _ElectionStrip({required this.election, required this.hasVoted});
+  final bool isClosed;
+  const _ElectionStrip({
+    required this.election,
+    required this.hasVoted,
+    this.isClosed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final statusLabel = isClosed ? 'ELECTION CLOSED' : 'LIVE ELECTION';
+    final statusDot = isClosed ? const Color(0xFF94A3B8) : const Color(0xFF34D399);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -240,14 +250,14 @@ class _ElectionStrip extends StatelessWidget {
                     Container(
                       width: 7,
                       height: 7,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF34D399),
+                      decoration: BoxDecoration(
+                        color: statusDot,
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'LIVE ELECTION',
+                      statusLabel,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 10,
@@ -272,7 +282,24 @@ class _ElectionStrip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          if (hasVoted)
+          if (isClosed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+              ),
+              child: const Text(
+                'Final results',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          else if (hasVoted)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
@@ -372,15 +399,23 @@ class _LiveStandings extends StatelessWidget {
   final List<dynamic> results;
   final bool loading;
   final bool hasElection;
+  final bool isClosed;
 
   const _LiveStandings({
     required this.results,
     required this.loading,
     required this.hasElection,
+    this.isClosed = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final title = isClosed ? 'Final Standings' : 'Live Standings';
+    final badge = isClosed ? 'FINAL' : 'LIVE';
+    final subtitle = isClosed
+        ? 'Official results per position — with photos'
+        : 'Top leaders per position — with photos';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -395,10 +430,10 @@ class _LiveStandings extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Live Standings',
-                style: TextStyle(
+                title,
+                style: const TextStyle(
                   color: AppColors.text,
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -410,13 +445,13 @@ class _LiveStandings extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.blueSoft,
+                  color: isClosed ? const Color(0xFFF1F5F9) : AppColors.blueSoft,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
-                  'LIVE',
+                child: Text(
+                  badge,
                   style: TextStyle(
-                    color: AppColors.blue,
+                    color: isClosed ? AppColors.textSecondary : AppColors.blue,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -426,9 +461,9 @@ class _LiveStandings extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Top leaders per position — with photos',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        Text(
+          subtitle,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
         const SizedBox(height: 14),
         if (loading)
@@ -450,24 +485,26 @@ class _LiveStandings extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Icon(Icons.bar_chart_rounded,
+                const Icon(Icons.bar_chart_rounded,
                     color: AppColors.textMuted, size: 36),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  'No tallies yet',
-                  style: TextStyle(
+                  isClosed ? 'No votes were cast' : 'No tallies yet',
+                  style: const TextStyle(
                     color: AppColors.text,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Results will appear once votes start coming in.',
+                  isClosed
+                      ? 'This election closed without recorded tallies.'
+                      : 'Results will appear once votes start coming in.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                 ),
               ],
             ),

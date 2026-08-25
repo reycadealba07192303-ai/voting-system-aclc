@@ -40,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _finish() async {
     await OnboardingService.markComplete();
     if (!mounted) return;
-    context.go('/login');
+    context.go('/student-login');
   }
 
   void _next() {

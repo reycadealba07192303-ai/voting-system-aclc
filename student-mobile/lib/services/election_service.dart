@@ -17,6 +17,8 @@ class ElectionService extends ChangeNotifier {
   List<dynamic> get results    => _results;
   bool get loading             => _loading;
   bool get resultsLoading      => _resultsLoading;
+  bool get isElectionOngoing => _activeElection?['status'] == 'ongoing';
+  bool get isElectionClosed => _activeElection?['status'] == 'closed';
 
   Future<void> loadActiveElection() async {
     _loading = true;
@@ -24,7 +26,10 @@ class ElectionService extends ChangeNotifier {
     Future.microtask(notifyListeners);
     try {
       _activeElection = await ApiClient.get('/mobile/election/active');
-    } catch (_) { _activeElection = null; }
+    } catch (_) {
+      _activeElection = null;
+    }
+    if (_activeElection == null) _results = [];
     _loading = false;
     notifyListeners();
   }
@@ -93,7 +98,8 @@ class ElectionService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Refresh active election + results without full-screen loaders.
+  /// Refresh current election + results without full-screen loaders.
+  /// Includes closed elections so final tallies stay on Home.
   Future<void> syncLive({bool silent = true}) async {
     try {
       final active = await ApiClient.get('/mobile/election/active');
@@ -105,6 +111,7 @@ class ElectionService extends ChangeNotifier {
     if (id != null) {
       await loadResults(id, silent: silent);
     } else {
+      _results = [];
       notifyListeners();
     }
   }

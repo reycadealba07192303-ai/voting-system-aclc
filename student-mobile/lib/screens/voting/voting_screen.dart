@@ -41,6 +41,19 @@ class _VotingScreenState extends State<VotingScreen> {
     final electionId = election['_id'] as String;
     final hasVoted = auth.student?['has_voted'] == true;
 
+    // Closed elections are for final tallies on Home; only load receipt if already voted
+    if (election['status'] == 'closed') {
+      if (hasVoted) {
+        setState(() => _loadingVotes = true);
+        try {
+          final status = await svc.getVoteStatus(electionId);
+          if (mounted) setState(() => _voteStatus = status);
+        } catch (_) {}
+        if (mounted) setState(() => _loadingVotes = false);
+      }
+      return;
+    }
+
     if (hasVoted) {
       setState(() => _loadingVotes = true);
       try {
@@ -308,12 +321,15 @@ class _VotingScreenState extends State<VotingScreen> {
       );
     }
 
-    if (svc.activeElection == null && !svc.loading) {
+    final electionClosed = svc.isElectionClosed;
+    if ((svc.activeElection == null || electionClosed) && !svc.loading) {
       final level = context.read<AuthService>().student?['level'] as String?;
       final hasLevel = level != null && level.isNotEmpty;
-      final message = !hasLevel
-          ? 'No election for you yet.\nAsk your admin to set your year level.'
-          : 'No open election for ${labelForLevel(level)}.\nCheck back when voting opens for your level.';
+      final message = electionClosed
+          ? 'Voting is closed for this election.\nFinal standings are on Home.'
+          : !hasLevel
+              ? 'No election for you yet.\nAsk your admin to set your year level.'
+              : 'No open election for ${labelForLevel(level)}.\nCheck back when voting opens for your level.';
       return Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(

@@ -9,6 +9,8 @@ const candidateSchema = new mongoose.Schema(
     partylist: { type: String, trim: true },
     platform: { type: String, trim: true },
     biodata: { type: String, trim: true },
+    /** Section this candidate runs for (required for section-based / representative races). */
+    section: { type: String, trim: true, default: '' },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 )

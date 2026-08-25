@@ -6,7 +6,7 @@ const Position  = require('../models/Position')
 const Candidate = require('../models/Candidate')
 const Student   = require('../models/Student')
 const { studentOnly } = require('../middleware/auth')
-const { studentCanAccessElection } = require('../constants/levels')
+const { studentInAudience } = require('../utils/audience')
 
 /**
  * POST /api/votes
@@ -39,9 +39,9 @@ router.post('/', studentOnly, async (req, res) => {
       return res.status(400).json({ message: 'Voting is outside the allowed time window' })
     }
 
-    const studentCheck = await Student.findById(studentId).select('level')
-    if (!studentCanAccessElection(studentCheck?.level, election.audience_levels)) {
-      return res.status(403).json({ message: 'This election is not available for your level' })
+    const studentCheck = await Student.findById(studentId).select('level section')
+    if (!studentInAudience(studentCheck, election)) {
+      return res.status(403).json({ message: 'This election is not available for your year level or section' })
     }
 
     const studentDoc = await Student.findOneAndUpdate(

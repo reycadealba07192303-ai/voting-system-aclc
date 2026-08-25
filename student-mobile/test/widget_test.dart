@@ -6,13 +6,15 @@ import 'package:student_mobile/services/election_service.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
+    final authService = AuthService();
+    await authService.loadToken();
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider<AuthService>(create: (_) => AuthService()),
+          ChangeNotifierProvider<AuthService>(create: (_) => authService),
           ChangeNotifierProvider<ElectionService>(create: (_) => ElectionService()),
         ],
-        child: const SSGElectionApp(),
+        child: SSGElectionApp(authService: authService),
       ),
     );
   });

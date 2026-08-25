@@ -12,13 +12,13 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Redirect to login on 401
+// Redirect admins to login on 401
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem('admin_token')
-      window.location.href = '/login'
+      window.location.href = '/admin-login'
     }
     return Promise.reject(err)
   }

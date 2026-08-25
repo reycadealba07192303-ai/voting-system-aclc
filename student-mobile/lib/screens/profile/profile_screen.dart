@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/election_service.dart';
+import '../../services/portal_bridge.dart';
 import '../../widgets/app_confirm_dialog.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/levels.dart';
@@ -59,7 +61,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final router = GoRouter.of(context);
     await auth.logout();
-    router.go('/login');
+
+    // Web: leave the portal and show the public landing page.
+    // Native: stay in-app and return to student login.
+    if (kIsWeb) {
+      notifyPortalLogout();
+      return;
+    }
+    router.go('/student-login');
   }
 
   @override

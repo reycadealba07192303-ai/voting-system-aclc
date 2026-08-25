@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import AppLayout from './components/layout/AppLayout'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
+import StudentPortal from './pages/StudentPortal'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Elections from './pages/Elections'
@@ -74,10 +76,13 @@ export default function App() {
           }}
         />
         <Routes>
-          <Route path="/login" element={<Login />} />
+          {/* Public landing and auth entries */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/student-login" element={<StudentPortal />} />
+          <Route path="/admin-login" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/admin-login" replace />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<AppLayout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="elections" element={<Elections />} />
             <Route path="elections/:id" element={<ElectionDetail />} />
@@ -86,7 +91,7 @@ export default function App() {
             <Route path="results" element={<Results />} />
             <Route path="audit-logs" element={<AuditLogs />} />
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

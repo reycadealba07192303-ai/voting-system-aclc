@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 export default function AppLayout() {
   const { isAuthenticated } = useAuth()
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/admin-login" replace />
 
   return (
     <div className="flex min-h-screen" style={{ background: '#0b1020' }}>
