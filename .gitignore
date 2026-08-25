@@ -44,3 +44,22 @@ student-mobile/android/app/debug/
 student-mobile/android/app/profile/
 student-mobile/android/app/release/
 student-mobile/ios/Flutter/.last_build_id
+
+# Personal / non-project documents — never commit these.
+# Nadulas ang mga ito noong Aug 2026; ang mga pattern na ito ang pumipigil sa pag-ulit.
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+
+# Ibang-project na assets na naiwan sa working tree
+/MSJAN.jpg
+/SIRCHARLES.jpg
+/SIRPAT.jpg
+/REYCA-DEV.png
+admin-web/src/pages/public/SRG*.png
+admin-web/src/pages/public/animation_creation.png
+admin-web/src/pages/public/auth_hero.png
+admin-web/src/pages/public/gamified_reading.png
+admin-web/src/pages/public/learning_mascot.png
+admin-web/src/pages/public/robot.png
