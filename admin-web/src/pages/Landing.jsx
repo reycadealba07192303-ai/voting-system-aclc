@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ACLC_LOGO, BRAND } from '../constants/branding'
+import Standings from '../student/components/Standings'
+import '../student/styles/student.css'
 import '../styles/landing.css'
 
 function useReveal() {
@@ -450,106 +452,36 @@ function TeamCarousel() {
   )
 }
 
-function LiveTalliesDashboard() {
-  const president = BALLOT[0]
+function LandingStandings() {
+  const mockResults = BALLOT.map((b, i) => ({
+    _id: String(i),
+    title: b.position,
+    max_winners: b.pick > 0 ? b.pick : 1,
+    total_voters: 1000,
+    candidates: b.candidates
+      .map((c, j) => ({
+        _id: `${i}-${j}`,
+        name: c.name,
+        partylist: c.party,
+        votes: Math.round(1000 * (c.pct / 100)),
+      }))
+      .sort((x, y) => y.votes - x.votes),
+  }))
 
   return (
-    <div className="relative rounded-3xl p-6 md:p-10 overflow-hidden shadow-2xl" style={{ backgroundColor: '#0f1523', border: '1px solid rgba(255,255,255,0.05)' }}>
-      {/* Glow effects */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#2333b4] rounded-full blur-[120px] opacity-20 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#ff4b3a] rounded-full blur-[120px] opacity-10 pointer-events-none" />
-
-      {/* Top right floating badge (Active Voters) */}
-      <div className="absolute top-6 right-6 z-10 flex items-center gap-3 px-4 py-2 rounded-2xl hidden md:flex" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/10 text-blue-400">
-          <Users size={16} />
-        </div>
-        <div>
-          <p className="text-white text-xs font-bold leading-tight">Active Voters</p>
-          <p className="text-slate-400 text-[10px]">+120 voting right now</p>
-        </div>
+    <div className="text-left bg-white" style={{ padding: '40px', borderRadius: '28px', border: '1px solid #e2e8f0', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}>
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-extrabold text-slate-900">Live result tallies</h2>
+        <p className="mt-2 text-slate-500">Sign in with your student ID to view the complete real-time election results.</p>
       </div>
-
-      <div className="relative z-10 grid md:grid-cols-3 gap-6 pt-8 md:pt-0">
-        
-        {/* Left Column */}
-        <div className="space-y-6 flex flex-col justify-center">
-          
-          {/* Total Votes Card */}
-          <div className="rounded-2xl p-5" style={{ backgroundColor: '#1a2333', border: '1px solid #2c3b53', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#059669', boxShadow: '0 0 15px rgba(5,150,105,0.4)' }}>
-                <TrendingUp size={20} className="text-white" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Total Votes Cast</p>
-                <p className="text-2xl font-extrabold text-white leading-tight">1,245</p>
-              </div>
-            </div>
-            {/* Progress bar line */}
-            <div className="mt-5 flex items-center gap-2">
-              <div className="h-1.5 rounded-full bg-[#059669] w-3/4 shadow-[0_0_8px_rgba(5,150,105,0.6)]" />
-              <div className="h-1.5 rounded-full bg-slate-700 w-1/4" />
-            </div>
-          </div>
-
-          {/* Recent Modules / Active Positions */}
-          <div className="rounded-2xl p-5" style={{ backgroundColor: '#1a2333', border: '1px solid #2c3b53', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-            <p className="text-[11px] font-bold text-white mb-4">Active Positions</p>
-            <div className="space-y-4">
-              {['Vice President', 'Secretary', 'Treasurer'].map((pos) => (
-                <div key={pos} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-800" />
-                  <div className="space-y-1.5 flex-1">
-                    <div className="h-2 rounded-full bg-slate-600 w-2/3" />
-                    <div className="h-2 rounded-full bg-slate-800 w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column / Center */}
-        <div className="md:col-span-2 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden" style={{ backgroundColor: '#1a2333', border: '1px solid #2c3b53', boxShadow: '0 10px 40px rgba(0,0,0,0.25)' }}>
-          {/* Subtle grid background for the center card */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-          
-          <div className="relative z-10 flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-emerald-400 to-emerald-600 mb-5 shadow-[0_0_20px_rgba(5,150,105,0.4)]">
-              <ShieldCheck size={28} className="text-white" />
-            </div>
-            <h3 className="text-xl md:text-2xl font-extrabold text-white">Presidential Race Live Tally</h3>
-            <p className="text-slate-400 text-sm mt-2 max-w-sm">
-              Live, real-time result tallies as they are recorded directly from the student portal.
-            </p>
-            
-            <div className="w-full max-w-md mt-8 space-y-4 text-left">
-              {president.candidates.map((c, i) => {
-                const isLeading = i === 0
-                const barColor = isLeading ? '#34d399' : '#60a5fa'
-                
-                return (
-                  <div key={c.name} className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-white font-bold">{c.name} <span className="text-slate-500 font-normal text-[10px] ml-1 uppercase">{c.party}</span></span>
-                      <span className="text-white font-extrabold">{c.pct}%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${c.pct}%`, backgroundColor: barColor, boxShadow: `0 0 10px ${barColor}` }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            
-            <Link to="/student-login" className="ld-btn ld-btn-accent mt-8 w-auto px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all">
-              <BarChart3 size={16} />
-              View full results
-            </Link>
-          </div>
-        </div>
-
+      <div className="sp-app" style={{ minHeight: 'auto', background: 'transparent' }}>
+        <Standings results={mockResults} loading={false} isClosed={false} />
+      </div>
+      <div className="mt-10 text-center">
+        <Link to="/student-login" className="ld-btn ld-btn-accent">
+          <BarChart3 size={16} />
+          View full results
+        </Link>
       </div>
     </div>
   )
@@ -719,7 +651,7 @@ export default function Landing() {
       <section className="pb-24">
         <div className="max-w-6xl mx-auto px-5">
           <div className="ld-reveal">
-            <LiveTalliesDashboard />
+            <LandingStandings />
           </div>
         </div>
       </section>
