@@ -12,5 +12,5 @@ export const BRAND = {
   progress: 'linear-gradient(90deg, #2333b4, #ff4b3a)',
   name: 'ACLC COLLEGE OF MANILA',
   campus: '',
-  panel: 'SSG Election Admin Panel',
+  panel: 'SG Election Admin Panel',
 }

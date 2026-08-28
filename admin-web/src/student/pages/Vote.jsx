@@ -189,7 +189,7 @@ export default function StudentVote() {
           <div className="sp-eyebrow">Ballot</div>
           <h1 className="sp-h1">Cast your ballot</h1>
           <p className="sp-lead">
-            {election.title || 'SSG Election'} · one choice per position. You may abstain
+            {election.title || 'SG Election'} · one choice per position. You may abstain
             on any position, and your ballot is recorded only once.
           </p>
         </div>

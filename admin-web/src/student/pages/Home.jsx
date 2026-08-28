@@ -122,7 +122,7 @@ export default function StudentHome() {
               <i className={`sp-dot ${isClosed ? 'sp-dot-off' : ''}`} />
               {isClosed ? 'Closed' : 'Now open'}
             </span>
-            <h2 className="sp-banner-title">{election.title || 'SSG Election'}</h2>
+            <h2 className="sp-banner-title">{election.title || 'SG Election'}</h2>
             <p className="sp-banner-sub">
               {isClosed
                 ? 'Voting has ended. The final standings are below.'

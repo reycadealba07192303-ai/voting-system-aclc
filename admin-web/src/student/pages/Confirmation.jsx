@@ -23,7 +23,7 @@ export default function StudentConfirmation() {
 
       <h1 className="sp-h1">Vote submitted</h1>
       <p className="sp-lead" style={{ marginTop: 8 }}>
-        Your ballot has been securely recorded. Thank you for taking part in the SSG
+        Your ballot has been securely recorded. Thank you for taking part in the SG
         elections.
       </p>
 
@@ -39,7 +39,7 @@ export default function StudentConfirmation() {
           </div>
           <div className="sp-kv">
             <span>Election</span>
-            <span>{election?.title || 'SSG Election'}</span>
+            <span>{election?.title || 'SG Election'}</span>
           </div>
         </div>
       </section>

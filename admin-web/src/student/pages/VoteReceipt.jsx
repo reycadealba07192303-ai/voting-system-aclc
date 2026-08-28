@@ -65,8 +65,8 @@ function ReceiptView({ election, rows, stamped }) {
               <Receipt size={22} />
             </span>
             <div style={{ minWidth: 0 }}>
-              <div className="sp-receipt-kicker">SSG Elections · Ballot receipt</div>
-              <h2 className="sp-receipt-title">{election?.title || 'SSG Election'}</h2>
+              <div className="sp-receipt-kicker">SG Elections · Ballot receipt</div>
+              <h2 className="sp-receipt-title">{election?.title || 'SG Election'}</h2>
             </div>
           </div>
           <span className="sp-chip sp-chip-ok">
@@ -251,7 +251,7 @@ export default function VoteReceipt({ voteStatus: initialStatus }) {
               <CheckCircle2 size={12} /> Recorded
             </span>
           </div>
-          <h2 className="sp-banner-title">{election?.title || 'SSG Election'}</h2>
+          <h2 className="sp-banner-title">{election?.title || 'SG Election'}</h2>
           <p className="sp-banner-sub">
             {loadingStatus
               ? 'Loading your ballot…'

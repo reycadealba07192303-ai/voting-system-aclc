@@ -160,7 +160,7 @@ export default function StudentLogin() {
           </div>
 
           <div className="sp-auth-card">
-            <span className="sp-chip sp-chip-blue">SSG Elections</span>
+            <span className="sp-chip sp-chip-blue">SG Elections</span>
             <h2 className="sp-h1" style={{ fontSize: 22, marginTop: 12 }}>
               {heading}
             </h2>
@@ -339,7 +339,7 @@ export default function StudentLogin() {
             className="sp-muted"
             style={{ textAlign: 'center', marginTop: 20, fontSize: 12 }}
           >
-            Not registered yet? Ask your SSG admin to add your student record first.
+            Not registered yet? Ask your SG admin to add your student record first.
           </p>
           </div>
         </div>

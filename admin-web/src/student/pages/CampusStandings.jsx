@@ -208,7 +208,7 @@ export default function CampusStandings() {
                     </span>
                   </div>
                   <h2 className="sp-h2" style={{ marginTop: 10, fontSize: 18 }}>
-                    {el.title || 'SSG Election'}
+                    {el.title || 'SG Election'}
                   </h2>
                 </div>
               </header>

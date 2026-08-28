@@ -171,7 +171,7 @@ const BALLOT = [
     position: 'President',
     candidates: [
       { name: 'A. Villanueva', party: 'ALYANSA', pct: 46 },
-      { name: 'R. Dela Cruz', party: 'BAGONG SSG', pct: 34 },
+      { name: 'R. Dela Cruz', party: 'BAGONG SG', pct: 34 },
       { name: 'M. Santos', party: 'INDEPENDENT', pct: 20 },
     ],
     pick: 0,
@@ -179,7 +179,7 @@ const BALLOT = [
   {
     position: 'Vice President',
     candidates: [
-      { name: 'J. Ramirez', party: 'BAGONG SSG', pct: 41 },
+      { name: 'J. Ramirez', party: 'BAGONG SG', pct: 41 },
       { name: 'K. Bautista', party: 'ALYANSA', pct: 38 },
       { name: 'L. Ocampo', party: 'INDEPENDENT', pct: 21 },
     ],
@@ -190,14 +190,14 @@ const BALLOT = [
     candidates: [
       { name: 'P. Mendoza', party: 'ALYANSA', pct: 52 },
       { name: 'D. Reyes', party: 'INDEPENDENT', pct: 29 },
-      { name: 'C. Aguilar', party: 'BAGONG SSG', pct: 19 },
+      { name: 'C. Aguilar', party: 'BAGONG SG', pct: 19 },
     ],
     pick: 0,
   },
   {
     position: 'Treasurer',
     candidates: [
-      { name: 'S. Navarro', party: 'BAGONG SSG', pct: 44 },
+      { name: 'S. Navarro', party: 'BAGONG SG', pct: 44 },
       { name: 'T. Gutierrez', party: 'ALYANSA', pct: 33 },
       { name: 'E. Lim', party: 'INDEPENDENT', pct: 23 },
     ],
@@ -207,7 +207,7 @@ const BALLOT = [
     position: 'Auditor',
     candidates: [
       { name: 'B. Salazar', party: 'ALYANSA', pct: 48 },
-      { name: 'N. Cortez', party: 'BAGONG SSG', pct: 31 },
+      { name: 'N. Cortez', party: 'BAGONG SG', pct: 31 },
       { name: 'G. Padilla', party: 'INDEPENDENT', pct: 21 },
     ],
     pick: 1,
@@ -217,7 +217,7 @@ const BALLOT = [
     candidates: [
       { name: 'F. Marquez', party: 'INDEPENDENT', pct: 43 },
       { name: 'H. Domingo', party: 'ALYANSA', pct: 36 },
-      { name: 'V. Cabrera', party: 'BAGONG SSG', pct: 21 },
+      { name: 'V. Cabrera', party: 'BAGONG SG', pct: 21 },
     ],
     pick: 0,
   },
@@ -285,7 +285,7 @@ function PhoneMockup() {
           <div className="flex items-center gap-2">
             <img src={ACLC_LOGO} alt="" className="w-8 h-8 rounded-full bg-white p-[2px]" />
             <div>
-              <p className="text-white text-xs font-extrabold leading-tight">SSG VOTE</p>
+              <p className="text-white text-xs font-extrabold leading-tight">SG VOTE</p>
               <p className="text-blue-100 text-[10px]">BSIT · 3RD YEAR</p>
             </div>
           </div>
@@ -466,7 +466,7 @@ export default function Landing() {
           <a href="#top" className="flex items-center gap-3 min-w-0">
             <img src={ACLC_LOGO} alt={BRAND.name} className="w-10 h-10 rounded-full bg-white p-0.5 shadow-sm" />
             <span className="min-w-0">
-              <span className="block text-[13px] font-extrabold tracking-tight truncate">SSG Elections</span>
+              <span className="block text-[13px] font-extrabold tracking-tight truncate">SG Elections</span>
               <span className="block text-[10px] font-semibold tracking-[0.14em] uppercase text-slate-500 truncate">
                 {BRAND.name}
               </span>
@@ -569,7 +569,7 @@ export default function Landing() {
           <div className="ld-reveal max-w-2xl">
             <p className="ld-kicker">Features</p>
             <h2 className="mt-3 text-3xl md:text-4xl font-extrabold tracking-tight">Built for elections that hold up</h2>
-            <p className="mt-4 text-slate-500">Every rule the SSG needs, enforced by the system instead of by hand.</p>
+            <p className="mt-4 text-slate-500">Every rule the SG needs, enforced by the system instead of by hand.</p>
           </div>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (

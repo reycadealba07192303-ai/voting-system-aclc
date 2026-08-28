@@ -65,7 +65,7 @@ export default function Login() {
 
         {/* Bottom tag */}
         <div className="relative z-10">
-          <p className="text-blue-200 text-sm">{BRAND.name} · SSG Elections</p>
+          <p className="text-blue-200 text-sm">{BRAND.name} · SG Elections</p>
         </div>
       </div>
 

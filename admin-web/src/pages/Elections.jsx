@@ -331,7 +331,7 @@ export default function Elections() {
           <div>
             <label className={labelCls}>Title</label>
             <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="input-dark" placeholder="e.g. SSG Election 2025–2026" />
+              className="input-dark" placeholder="e.g. SG Election 2025–2026" />
           </div>
           <div>
             <label className={labelCls}>Description</label>
