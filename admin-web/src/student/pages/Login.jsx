@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   AlertCircle,
   ArrowLeft,
@@ -119,8 +119,10 @@ export default function StudentLogin() {
   return (
     <div className="sp sp-auth">
       <aside className="sp-auth-side">
-        <div className="sp-auth-logo">
-          <img src={ACLC_LOGO} alt="ACLC College of Manila" />
+        <div className="sp-auth-logo" style={{ cursor: 'pointer' }}>
+          <Link to="/">
+            <img src={ACLC_LOGO} alt="ACLC College of Manila" />
+          </Link>
         </div>
         <h1 className="sp-auth-heading">
           ACLC COLLEGE
@@ -147,8 +149,10 @@ export default function StudentLogin() {
 
       <div className="sp-auth-panel">
         <div className="sp-auth-form">
-          <div className="sp-auth-mark">
-            <img src={ACLC_LOGO} alt="" />
+          <div className="sp-auth-mark" style={{ cursor: 'pointer' }}>
+            <Link to="/">
+              <img src={ACLC_LOGO} alt="" />
+            </Link>
             <div>
               <div className="sp-brand-sub">Student Portal</div>
               <div className="sp-brand-name">ACLC College of Manila</div>

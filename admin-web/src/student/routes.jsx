@@ -32,7 +32,7 @@ export function RequireStudent() {
   const location = useLocation()
 
   if (!isLoggedIn) {
-    return <Navigate to="/student-login" replace state={{ from: location.pathname }} />
+    return <Navigate to="/" replace state={{ from: location.pathname }} />
   }
   return <StudentLayout />
 }

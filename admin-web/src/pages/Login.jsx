@@ -46,8 +46,10 @@ export default function Login() {
         />
 
         {/* Logo */}
-        <div className="relative z-10">
-          <BrandLogo size="lg" subtitle={BRAND.panel} />
+        <div className="relative z-10 cursor-pointer">
+          <Link to="/">
+            <BrandLogo size="lg" subtitle={BRAND.panel} />
+          </Link>
         </div>
 
         {/* Center text */}
@@ -71,8 +73,10 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <div className="mb-10 lg:hidden">
-            <BrandLogo size="md" subtitle={BRAND.panel} />
+          <div className="mb-10 lg:hidden cursor-pointer">
+            <Link to="/">
+              <BrandLogo size="md" subtitle={BRAND.panel} />
+            </Link>
           </div>
 
           <h1 className="text-2xl font-bold text-white mb-1">Sign in</h1>
