@@ -15,13 +15,9 @@ import {
   ShieldCheck,
   Trophy,
   Vote,
-  TrendingUp,
-  Users,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ACLC_LOGO, BRAND } from '../constants/branding'
-import Standings from '../student/components/Standings'
-import '../student/styles/student.css'
 import '../styles/landing.css'
 
 function useReveal() {
@@ -452,40 +448,6 @@ function TeamCarousel() {
   )
 }
 
-function LandingStandings() {
-  const mockResults = BALLOT.map((b, i) => ({
-    _id: String(i),
-    title: b.position,
-    max_winners: b.pick > 0 ? b.pick : 1,
-    total_voters: 1000,
-    candidates: b.candidates
-      .map((c, j) => ({
-        _id: `${i}-${j}`,
-        name: c.name,
-        partylist: c.party,
-        votes: Math.round(1000 * (c.pct / 100)),
-      }))
-      .sort((x, y) => y.votes - x.votes),
-  }))
-
-  return (
-    <div className="text-left bg-white" style={{ padding: '40px', borderRadius: '28px', border: '1px solid #e2e8f0', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}>
-      <div className="mb-8 text-center">
-        <h2 className="text-3xl font-extrabold text-slate-900">Live result tallies</h2>
-        <p className="mt-2 text-slate-500">Sign in with your student ID to view the complete real-time election results.</p>
-      </div>
-      <div className="sp-app" style={{ minHeight: 'auto', background: 'transparent' }}>
-        <Standings results={mockResults} loading={false} isClosed={false} />
-      </div>
-      <div className="mt-10 text-center">
-        <Link to="/student-login" className="ld-btn ld-btn-accent">
-          <BarChart3 size={16} />
-          View full results
-        </Link>
-      </div>
-    </div>
-  )
-}
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false)
@@ -648,13 +610,6 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="pb-24">
-        <div className="max-w-6xl mx-auto px-5">
-          <div className="ld-reveal">
-            <LandingStandings />
-          </div>
-        </div>
-      </section>
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
