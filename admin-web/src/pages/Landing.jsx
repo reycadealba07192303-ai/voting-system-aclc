@@ -616,12 +616,12 @@ export default function Landing() {
             style={{ background: 'linear-gradient(135deg, #1d248f, #2333b4 50%, #161d73)' }}
           >
             <div className="absolute top-0 inset-x-0 h-1" style={{ background: '#ff4b3a' }} />
-            <p className="text-blue-100 text-xs font-extrabold tracking-[0.16em] uppercase">Ready</p>
-            <h2 className="mt-3 text-white text-3xl md:text-4xl font-extrabold">Your ballot is waiting</h2>
-            <p className="mt-3 text-blue-100">Sign in with your student ID and vote right here in your browser.</p>
+            <p className="text-blue-100 text-xs font-extrabold tracking-[0.16em] uppercase">Live</p>
+            <h2 className="mt-3 text-white text-3xl md:text-4xl font-extrabold">Live result tallies</h2>
+            <p className="mt-3 text-blue-100">Sign in with your student ID to view the real-time election results.</p>
             <Link to="/student-login" className="ld-btn ld-btn-accent mt-8">
-              <Vote size={16} />
-              Vote now
+              <BarChart3 size={16} />
+              View results
             </Link>
           </div>
         </div>
