@@ -26,22 +26,19 @@ function Section({ icon: Icon, title, body }) {
 export default function StudentCandidateDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { election, candidates, loadActiveElection, loadCandidatesFor } = useElection()
+  const { election, candidates, loadElections, loadCandidatesFor } = useElection()
   const [broken, setBroken] = useState(false)
+  const selectedId = election?._id ? String(election._id) : null
 
   useEffect(() => {
-    if (candidates.length) return
-    let cancelled = false
-    ;(async () => {
-      const active = election || (await loadActiveElection())
-      if (cancelled || !active?._id) return
-      await loadCandidatesFor(active._id)
-    })()
-    return () => {
-      cancelled = true
-    }
+    loadElections()
+  }, [loadElections])
+
+  // Deep links land here with an empty roster — pull the selected race's list.
+  useEffect(() => {
+    if (selectedId && !candidates.length) loadCandidatesFor(selectedId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [selectedId])
 
   const candidate = candidates.find((c) => String(c._id) === String(id))
 
@@ -94,7 +91,10 @@ export default function StudentCandidateDetail() {
         <div className="sp-detail-main">
           <div>
             {posTitle ? (
-              <span className="sp-chip sp-chip-blue sp-chip-caps" style={{ marginBottom: 10 }}>
+              <span
+                className="sp-chip sp-chip-blue sp-chip-caps sp-chip-wrap"
+                style={{ marginBottom: 10 }}
+              >
                 {posTitle}
               </span>
             ) : null}

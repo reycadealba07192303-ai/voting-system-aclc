@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, Check } from 'lucide-react'
 import { useElection } from '../context/ElectionContext'
 
 function formatNow(date = new Date()) {
@@ -13,7 +13,18 @@ function formatNow(date = new Date()) {
 }
 
 export default function StudentConfirmation() {
-  const { election } = useElection()
+  const navigate = useNavigate()
+  const { election, pendingElections, selectElection } = useElection()
+
+  // A student is usually on more than one ballot; send them straight to the next.
+  const next = pendingElections.find(
+    (e) => String(e._id) !== String(election?._id)
+  )
+
+  function goToNext() {
+    selectElection(String(next._id))
+    navigate('/student/vote')
+  }
 
   return (
     <div style={{ maxWidth: 480, margin: '8px auto 0' }}>
@@ -43,6 +54,29 @@ export default function StudentConfirmation() {
           </div>
         </div>
       </section>
+
+      {next ? (
+        <section className="sp-panel" style={{ marginTop: 16 }}>
+          <div className="sp-panel-body" style={{ display: 'grid', gap: 12 }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14.5 }}>
+                One more ballot for you
+              </div>
+              <p className="sp-muted" style={{ marginTop: 4, fontSize: 13 }}>
+                You are also eligible to vote in {next.title || 'another election'}.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="sp-btn sp-btn-accent sp-btn-block"
+              onClick={goToNext}
+            >
+              Go to that ballot
+              <ArrowRight size={15} />
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <div style={{ display: 'grid', gap: 10, marginTop: 22 }}>
         <Link to="/student/vote?view=receipt" className="sp-btn sp-btn-primary sp-btn-block">

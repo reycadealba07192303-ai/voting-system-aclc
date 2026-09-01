@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertCircle,
@@ -33,16 +33,21 @@ function candidatesFor(position, roster) {
 
 export default function StudentVote() {
   const navigate = useNavigate()
-  const { student, hasVoted, markVoted } = useStudentAuth()
+  const { student } = useStudentAuth()
   const {
     election,
+    elections,
+    pendingElections,
+    hasVoted,
     ballot,
     candidates,
     loading,
     isClosed,
-    loadActiveElection,
+    loadElections,
     loadBallotFor,
+    selectElection,
     fetchVoteStatus,
+    markVotedIn,
     submitVote,
   } = useElection()
 
@@ -55,33 +60,50 @@ export default function StudentVote() {
   const [voteStatus, setVoteStatus] = useState(null)
   const [checking, setChecking] = useState(true)
 
-  const bootstrap = useCallback(async () => {
-    const active = await loadActiveElection()
-    if (!active?._id) {
-      setChecking(false)
-      return
-    }
-
-    // Whether the ballot or the receipt shows depends on the server, not cache.
-    let alreadyVoted = false
-    try {
-      const { data } = await fetchVoteStatus(active._id)
-      alreadyVoted = data?.has_voted === true
-      setVoteStatus(data)
-      markVoted(alreadyVoted)
-    } catch {
-      // Status unknown — the cached flag below decides what renders.
-    }
-
-    if (!alreadyVoted && active.status === 'ongoing') {
-      await loadBallotFor(active._id)
-    }
-    setChecking(false)
-  }, [loadActiveElection, fetchVoteStatus, loadBallotFor, markVoted])
+  const selectedId = election?._id ? String(election._id) : null
 
   useEffect(() => {
-    bootstrap()
-  }, [bootstrap])
+    loadElections()
+  }, [loadElections])
+
+  // Re-bootstrap whenever the student switches to another race.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      if (!selectedId) {
+        if (!cancelled) setChecking(false)
+        return
+      }
+      if (!cancelled) {
+        setChecking(true)
+        setPicks({})
+        setIndex(0)
+        setError('')
+      }
+
+      // Whether the ballot or the receipt shows depends on the server, not cache.
+      let alreadyVoted = false
+      try {
+        const { data } = await fetchVoteStatus(selectedId)
+        alreadyVoted = data?.has_voted === true
+        if (!cancelled) {
+          setVoteStatus(data)
+          markVotedIn(selectedId, alreadyVoted)
+        }
+      } catch {
+        // Status unknown — the cached flag below decides what renders.
+      }
+
+      if (!cancelled && !alreadyVoted && election?.status === 'ongoing') {
+        await loadBallotFor(selectedId)
+      }
+      if (!cancelled) setChecking(false)
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
 
   const total = ballot.length
   const current = total ? ballot[Math.min(index, total - 1)] : null
@@ -133,7 +155,6 @@ export default function StudentVote() {
     setError('')
     try {
       await submitVote(election._id, buildSubmission())
-      markVoted(true)
       setReviewOpen(false)
       navigate('/student/confirmation', { replace: true })
     } catch (err) {
@@ -153,21 +174,57 @@ export default function StudentVote() {
     )
   }
 
+  // Races other than this one that are still waiting on a ballot.
+  const otherPending = pendingElections.filter(
+    (e) => String(e._id) !== String(election?._id)
+  )
+  const nextBallotNudge = otherPending.length ? (
+    <div className="sp-alert sp-alert-warn" style={{ marginBottom: 18 }}>
+      <AlertCircle size={16} />
+      <span>
+        You still have {otherPending.length} ballot
+        {otherPending.length === 1 ? '' : 's'} to cast:{' '}
+        {otherPending.map((e, i) => (
+          <span key={String(e._id)}>
+            {i > 0 ? ', ' : ''}
+            <button
+              type="button"
+              className="sp-linkish"
+              onClick={() => selectElection(String(e._id))}
+            >
+              {e.title || 'SG Election'}
+            </button>
+          </span>
+        ))}
+      </span>
+    </div>
+  ) : null
+
   // ── Already voted → receipt ────────────────────────────────────────────────
   if (hasVoted) {
-    return <VoteReceipt voteStatus={voteStatus} />
+    return (
+      <>
+        {nextBallotNudge}
+        <VoteReceipt voteStatus={voteStatus} />
+      </>
+    )
   }
 
   // ── Nothing open for this student ──────────────────────────────────────────
   if (!election || isClosed) {
     return (
-      <EmptyState icon={Lock} title={isClosed ? 'Voting is closed' : 'No open election'}>
-        {isClosed
-          ? 'This election has ended. The final standings are on the Overview page.'
-          : student?.level
-            ? `No election is open for ${labelForLevel(student.level)} yet. Check back when voting starts for your level.`
-            : 'Ask your admin to set your year level so the right ballot reaches you.'}
-      </EmptyState>
+      <>
+        {nextBallotNudge}
+        <EmptyState icon={Lock} title={isClosed ? 'Voting is closed' : 'No open election'}>
+          {isClosed
+            ? 'This election has ended. The final standings are on the Overview page.'
+            : elections.length
+              ? 'None of your elections are open for voting right now.'
+              : student?.level
+                ? `No election is open for ${labelForLevel(student.level)} yet. Check back when voting starts for your level.`
+                : 'Ask your admin to set your year level so the right ballot reaches you.'}
+        </EmptyState>
+      </>
     )
   }
 
@@ -204,6 +261,8 @@ export default function StudentVote() {
           <span>{error}</span>
         </div>
       ) : null}
+
+      {nextBallotNudge}
 
       <div className="sp-ballot-layout sp-reveal-2">
         {/* ── Position rail ─────────────────────────────────────────────── */}
@@ -450,7 +509,7 @@ export default function StudentVote() {
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
               {skipped.map((pos) => (
-                <span key={pos._id} className="sp-chip sp-chip-flat">
+                <span key={pos._id} className="sp-chip sp-chip-flat sp-chip-wrap">
                   {pos.title}
                 </span>
               ))}

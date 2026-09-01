@@ -44,13 +44,23 @@ router.post('/', studentOnly, async (req, res) => {
       return res.status(403).json({ message: 'This election is not available for your year level or section' })
     }
 
+    // Legacy ballots (cast before the per-election ledger existed) only show up
+    // as Vote documents, so check those before claiming.
+    const alreadyVoted = await Vote.exists({ election_id, student_id: studentId })
+    if (alreadyVoted) {
+      return res.status(409).json({ message: 'You have already cast your ballot for this election' })
+    }
+
+    // Claim this one election atomically. A student in several audiences
+    // (campus-wide + their program's race) still gets one ballot in each.
+    // sanitizeFilter is on globally, so $ne has to be marked trusted.
     const studentDoc = await Student.findOneAndUpdate(
-      { _id: studentId, has_voted: false },
-      { $set: { has_voted: true } },
+      { _id: studentId, voted_elections: mongoose.trusted({ $ne: election_id }) },
+      { $addToSet: { voted_elections: election_id }, $set: { has_voted: true } },
       { new: false }
     )
     if (!studentDoc) {
-      return res.status(409).json({ message: 'You have already cast your vote for this election' })
+      return res.status(409).json({ message: 'You have already cast your ballot for this election' })
     }
 
     try {
@@ -116,7 +126,21 @@ router.post('/', studentOnly, async (req, res) => {
       await Vote.insertMany(voteDocs)
       res.status(201).json({ message: 'Vote submitted successfully' })
     } catch (innerErr) {
-      await Student.findByIdAndUpdate(studentId, { $set: { has_voted: false } })
+      // Release the claim so a rejected ballot can be corrected and re-sent.
+      // The claim was exclusive, so any rows already written are ours to undo.
+      await Vote.deleteMany({ election_id, student_id: studentId })
+      await Student.findByIdAndUpdate(studentId, {
+        $pull: { voted_elections: election_id },
+      })
+      const stillVoted = await Vote.exists({ student_id: studentId })
+      if (!stillVoted) {
+        await Student.findByIdAndUpdate(studentId, { $set: { has_voted: false } })
+      }
+      if (innerErr?.code === 11000) {
+        return res
+          .status(409)
+          .json({ message: 'You have already cast your ballot for this election' })
+      }
       const status  = innerErr.status || 500
       const message = innerErr.message || 'Vote submission failed'
       return res.status(status).json({ message })

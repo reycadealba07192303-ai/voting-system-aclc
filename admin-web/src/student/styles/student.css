@@ -676,6 +676,19 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/*
+ * Position titles run long ("Vice President for External Affairs") and used to
+ * spill past the edge of a narrow card. This lets them wrap and stay inside.
+ */
+.sp-chip-wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  line-height: 1.35;
 }
 
 .sp-chip-live {
@@ -717,6 +730,162 @@
   font-size: 12px;
   letter-spacing: 0.08em;
   border-radius: 8px;
+}
+
+/* ── Election switcher ────────────────────────────────────────────────────── */
+.sp-elx {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--sp-line);
+  background: var(--sp-surface);
+  box-shadow: var(--sp-shadow-xs);
+}
+
+.sp-elx-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sp-muted);
+  padding-left: 4px;
+  flex: none;
+}
+
+.sp-elx-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-elx-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--sp-line);
+  background: var(--sp-surface-2);
+  color: var(--sp-text-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.sp-elx-tab:hover {
+  border-color: var(--sp-blue-line);
+  background: var(--sp-blue-wash);
+}
+
+.sp-elx-tab.is-active {
+  border-color: var(--sp-blue-line);
+  background: var(--sp-blue-wash);
+  color: var(--sp-blue-dark);
+  box-shadow: inset 0 0 0 1px var(--sp-blue-line);
+}
+
+.sp-elx-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-elx-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--sp-line-soft);
+  color: var(--sp-muted);
+}
+
+.sp-elx-tag.is-ok {
+  background: var(--sp-success-soft);
+  color: var(--sp-success);
+}
+
+.sp-elx-tag.is-todo {
+  background: var(--sp-red-soft);
+  color: #c02718;
+}
+
+@media (max-width: 640px) {
+  .sp-elx-name {
+    max-width: 44vw;
+  }
+}
+
+/* Inline text button used inside alert copy. */
+.sp-linkish {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Home's "your elections" list — one row per race the student may vote in. */
+.sp-elx-list {
+  display: grid;
+}
+
+.sp-elx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-top: 1px solid var(--sp-line-soft);
+}
+
+.sp-elx-row:first-child {
+  border-top: none;
+}
+
+.sp-elx-row.is-active {
+  background: var(--sp-blue-wash);
+}
+
+.sp-elx-row-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.sp-elx-row-title {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sp-elx-row-sub {
+  font-size: 12px;
+  color: var(--sp-text-2);
 }
 
 .sp-dot {
@@ -1201,12 +1370,15 @@
 }
 
 .sp-rail-title {
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   font-size: 14.5px;
   font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.3;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .sp-rail-sub {

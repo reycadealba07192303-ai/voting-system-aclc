@@ -48,43 +48,46 @@ function Stat({ icon: Icon, label, value, note, tone }) {
 }
 
 export default function StudentHome() {
-  const { student, hasVoted, markVoted } = useStudentAuth()
+  const { student } = useStudentAuth()
   const {
     election,
+    elections,
+    pendingElections,
+    hasVoted,
     results,
     resultsLoading,
     loading,
     isClosed,
-    loadActiveElection,
+    selectElection,
+    loadElections,
     loadResultsFor,
-    fetchVoteStatus,
   } = useElection()
 
   const [refreshing, setRefreshing] = useState(false)
+  const selectedId = election?._id ? String(election._id) : null
 
   const load = useCallback(async () => {
-    const active = await loadActiveElection()
-    if (!active?._id) return
-    await loadResultsFor(active._id)
-    try {
-      const { data } = await fetchVoteStatus(active._id)
-      markVoted(data?.has_voted === true)
-    } catch {
-      // non-fatal
-    }
-  }, [loadActiveElection, loadResultsFor, fetchVoteStatus, markVoted])
+    await loadElections()
+  }, [loadElections])
 
   useEffect(() => {
     load()
   }, [load])
 
+  // The tally belongs to whichever race the switcher is pointing at.
+  useEffect(() => {
+    if (selectedId) loadResultsFor(selectedId)
+  }, [selectedId, loadResultsFor])
+
   async function handleRefresh() {
     setRefreshing(true)
     await load()
+    if (selectedId) await loadResultsFor(selectedId)
     setRefreshing(false)
   }
 
   const levelLabel = labelForLevel(student?.level)
+  const openCount = elections.filter((e) => e.status === 'ongoing').length
   const positionCount = results.length
   const candidateCount = results.reduce((n, p) => n + (p.candidates?.length || 0), 0)
   const turnout = results[0]?.total_voters ?? 0
@@ -98,8 +101,9 @@ export default function StudentHome() {
             {greetingFor()}, {firstNameOf(student?.name)}
           </h1>
           <p className="sp-lead">
-            Everything for the {levelLabel} student government election — roster, ballot,
-            and the running count.
+            {elections.length > 1
+              ? `You are on ${elections.length} ballots as a ${levelLabel} student — the campus-wide race and your program's. Cast one in each.`
+              : `Everything for the ${levelLabel} student government election — roster, ballot, and the running count.`}
           </p>
         </div>
         <button
@@ -157,13 +161,87 @@ export default function StudentHome() {
         </section>
       )}
 
+      {elections.length > 1 ? (
+        <section className="sp-panel sp-reveal-2" style={{ marginBottom: 24 }}>
+          <header className="sp-panel-head">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h2 className="sp-h2" style={{ fontSize: 16 }}>
+                Your elections
+              </h2>
+              <p className="sp-muted" style={{ marginTop: 4 }}>
+                You are eligible for every race below. Each one takes its own ballot.
+              </p>
+            </div>
+            <span className="sp-chip sp-chip-flat">{elections.length}</span>
+          </header>
+          <div className="sp-elx-list">
+            {elections.map((e) => {
+              const id = String(e._id)
+              const open = e.status === 'ongoing'
+              const active = id === selectedId
+              return (
+                <div key={id} className={`sp-elx-row ${active ? 'is-active' : ''}`}>
+                  <button
+                    type="button"
+                    className="sp-elx-row-main"
+                    onClick={() => selectElection(id)}
+                  >
+                    <span className="sp-elx-row-title">{e.title || 'SG Election'}</span>
+                    <span className="sp-elx-row-sub">
+                      {open ? 'Voting open' : 'Voting closed'} ·{' '}
+                      {formatDate(e.start_date)} — {formatDate(e.end_date)}
+                    </span>
+                  </button>
+                  {open && !e.has_voted ? (
+                    <Link
+                      to="/student/vote"
+                      className="sp-btn sp-btn-accent sp-btn-sm"
+                      onClick={() => selectElection(id)}
+                    >
+                      Go to ballot
+                      <ArrowRight size={14} />
+                    </Link>
+                  ) : (
+                    <span
+                      className={`sp-chip ${e.has_voted ? 'sp-chip-ok' : 'sp-chip-flat'}`}
+                    >
+                      {e.has_voted ? (
+                        <>
+                          <CheckCircle2 size={12} /> Voted
+                        </>
+                      ) : (
+                        'Closed'
+                      )}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
+
       <div className="sp-stats">
         <Stat
-          icon={hasVoted ? CheckCircle2 : CircleDashed}
-          label="Your ballot"
-          value={hasVoted ? 'Submitted' : election ? 'Not cast' : '—'}
-          note={hasVoted ? 'Recorded once, final' : 'One ballot per student'}
-          tone={hasVoted ? 'is-ok' : election ? 'is-warn' : ''}
+          icon={pendingElections.length ? CircleDashed : CheckCircle2}
+          label={openCount > 1 ? 'Your ballots' : 'Your ballot'}
+          value={
+            openCount === 0
+              ? '—'
+              : openCount > 1
+                ? `${openCount - pendingElections.length} of ${openCount}`
+                : pendingElections.length
+                  ? 'Not cast'
+                  : 'Submitted'
+          }
+          note={
+            pendingElections.length
+              ? `${pendingElections.length} still waiting on you`
+              : openCount
+                ? 'Recorded once, final'
+                : 'One ballot per election'
+          }
+          tone={openCount === 0 ? '' : pendingElections.length ? 'is-warn' : 'is-ok'}
         />
         <Stat
           icon={LayoutList}

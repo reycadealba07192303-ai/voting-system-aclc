@@ -11,6 +11,9 @@ export const createStudentPassword = (student_id, new_password) =>
   studentApi.post('/auth/student/set-password', { student_id, new_password })
 
 // ── Election data (student token required) ────────────────────────────────────
+/** Every election this student belongs to — campus-wide plus their own races. */
+export const getMyElections = () => studentApi.get('/mobile/elections')
+
 export const getActiveElection = () => studentApi.get('/mobile/election/active')
 
 export const getBallot = (electionId) =>

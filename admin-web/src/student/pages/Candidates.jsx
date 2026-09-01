@@ -13,25 +13,22 @@ function positionTitle(candidate) {
 
 export default function StudentCandidates() {
   const navigate = useNavigate()
-  const { election, candidates, loading, loadActiveElection, loadCandidatesFor } =
+  const { election, candidates, loading, loadElections, loadCandidatesFor } =
     useElection()
+  const selectedId = election?._id ? String(election._id) : null
   const [team, setTeam] = useState('all')
   const [query, setQuery] = useState('')
   const [view, setView] = useState('grid')
   const [openTeams, setOpenTeams] = useState(() => new Set())
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const active = election || (await loadActiveElection())
-      if (cancelled || !active?._id) return
-      await loadCandidatesFor(active._id)
-    })()
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    loadElections()
+  }, [loadElections])
+
+  // The roster belongs to one race — refetch when the switcher moves.
+  useEffect(() => {
+    if (selectedId) loadCandidatesFor(selectedId)
+  }, [selectedId, loadCandidatesFor])
 
   const teams = useMemo(() => {
     const counts = new Map()
@@ -253,7 +250,7 @@ export default function StudentCandidates() {
                                 </div>
                               </td>
                               <td>
-                                <span className="sp-chip sp-chip-blue sp-chip-caps">
+                                <span className="sp-chip sp-chip-blue sp-chip-caps sp-chip-wrap">
                                   {positionTitle(c) || '—'}
                                 </span>
                               </td>

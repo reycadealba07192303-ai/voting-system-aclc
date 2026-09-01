@@ -55,6 +55,8 @@ export function StudentAuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem(STUDENT_TOKEN_KEY)
     localStorage.removeItem(STUDENT_USER_KEY)
+    // The remembered election belongs to the student who just left.
+    localStorage.removeItem('sp_selected_election')
     setToken(null)
     setStudent(null)
   }, [])

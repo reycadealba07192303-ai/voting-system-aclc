@@ -26,26 +26,17 @@ function InfoRow({ icon: Icon, label, value }) {
 }
 
 export default function StudentProfile() {
-  const { student, hasVoted, markVoted } = useStudentAuth()
-  const { election, loadActiveElection, fetchVoteStatus } = useElection()
+  const { student } = useStudentAuth()
+  const { elections, pendingElections, loadElections } = useElection()
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const active = election || (await loadActiveElection())
-      if (cancelled || !active?._id) return
-      try {
-        const { data } = await fetchVoteStatus(active._id)
-        if (!cancelled) markVoted(data?.has_voted === true)
-      } catch {
-        // leave the cached flag alone
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    loadElections()
+  }, [loadElections])
+
+  const openElections = elections.filter((e) => e.status === 'ongoing')
+  const nextBallot = pendingElections[0] || null
+  // "Done" only once every race the student belongs to has a ballot in it.
+  const hasVoted = openElections.length > 0 && pendingElections.length === 0
 
   return (
     <>
@@ -53,7 +44,9 @@ export default function StudentProfile() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="sp-eyebrow">Account</div>
           <h1 className="sp-h1">My profile</h1>
-          <p className="sp-lead">Your student record and voting status for this election.</p>
+          <p className="sp-lead">
+            Your student record and voting status across every election you belong to.
+          </p>
         </div>
       </div>
 
@@ -102,13 +95,19 @@ export default function StudentProfile() {
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>
-                  {hasVoted ? 'Vote submitted' : 'You have not voted yet'}
+                  {hasVoted
+                    ? openElections.length > 1
+                      ? `All ${openElections.length} ballots submitted`
+                      : 'Vote submitted'
+                    : pendingElections.length > 1
+                      ? `${pendingElections.length} ballots still to cast`
+                      : 'You have not voted yet'}
                 </div>
                 <p className="sp-muted" style={{ marginTop: 3, fontSize: 13 }}>
                   {hasVoted
-                    ? 'Your ballot is securely recorded and cannot be changed.'
-                    : election
-                      ? `Open now: ${election.title}`
+                    ? 'Your ballots are securely recorded and cannot be changed.'
+                    : nextBallot
+                      ? `Open now: ${nextBallot.title}`
                       : 'Cast your ballot when voting opens.'}
                 </p>
               </div>

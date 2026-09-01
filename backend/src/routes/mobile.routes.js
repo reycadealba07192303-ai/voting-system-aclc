@@ -34,6 +34,50 @@ async function assertElectionAccess(req, electionId) {
   return { student, election }
 }
 
+/**
+ * GET every election this student may take part in.
+ *
+ * A student is normally in more than one audience at a time — the campus-wide
+ * race plus their own program's representative race — so the portal lists them
+ * all instead of guessing a single "active" one.
+ *
+ * Ongoing elections come first, then closed ones (kept so final tallies stay
+ * readable). Within a group the oldest is first, which keeps the order stable
+ * for the whole term instead of reshuffling as new races are filed.
+ */
+router.get('/elections', studentOnly, async (req, res) => {
+  try {
+    const student = await loadStudentLevel(req)
+
+    // sanitizeFilter is on globally, which strips $in — hence the $or form.
+    const all = await Election.find({
+      $or: [{ status: 'ongoing' }, { status: 'closed' }],
+    }).lean()
+
+    const mine = all.filter((election) => studentInAudience(student, election))
+
+    const votedIds = new Set(
+      (await Vote.distinct('election_id', { student_id: req.user.id })).map(String)
+    )
+
+    const statusRank = { ongoing: 0, closed: 1 }
+    const payload = mine
+      .map((election) => ({
+        ...election,
+        has_voted: votedIds.has(String(election._id)),
+      }))
+      .sort((a, b) => {
+        const byStatus = (statusRank[a.status] ?? 9) - (statusRank[b.status] ?? 9)
+        if (byStatus !== 0) return byStatus
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+      })
+
+    res.json(payload)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 // GET current election for this student's level (ongoing, else latest closed for final tallies)
 router.get('/election/active', studentOnly, async (req, res) => {
   try {

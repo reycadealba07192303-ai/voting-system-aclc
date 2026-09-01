@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const mongoose = require('mongoose')
 const router = require('express').Router()
 const Election = require('../models/Election')
 const Candidate = require('../models/Candidate')
@@ -154,10 +155,24 @@ router.delete('/:id', adminOnly, requireAdminPassword, async (req, res) => {
     ])
 
     if (voterIds.length) {
+      // Drop only this election's claim — a student may still hold a ballot in
+      // another race, so has_voted is recomputed rather than blanket-cleared.
+      // sanitizeFilter is on globally, so every $-operator must be trusted.
       await Student.updateMany(
-        { _id: { $in: voterIds } },
-        { $set: { has_voted: false } }
+        { _id: mongoose.trusted({ $in: voterIds }) },
+        { $pull: { voted_elections: electionId } }
       )
+      const stillVoting = await Vote.distinct('student_id', {
+        student_id: mongoose.trusted({ $in: voterIds }),
+      })
+      const stillVotingIds = new Set(stillVoting.map((id) => String(id)))
+      const cleared = voterIds.filter((id) => !stillVotingIds.has(String(id)))
+      if (cleared.length) {
+        await Student.updateMany(
+          { _id: mongoose.trusted({ $in: cleared }) },
+          { $set: { has_voted: false } }
+        )
+      }
     }
 
     // Best-effort photo cleanup (ignore missing files)

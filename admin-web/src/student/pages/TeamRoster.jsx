@@ -37,7 +37,11 @@ function CandidateCard({ candidate }) {
       </div>
       <div className="sp-cand-meta">
         {position ? (
-          <span className="sp-chip sp-chip-blue sp-chip-caps" style={{ marginBottom: 8 }}>
+          <span
+            className="sp-chip sp-chip-blue sp-chip-caps sp-chip-wrap"
+            style={{ marginBottom: 8 }}
+            title={position}
+          >
             {position}
           </span>
         ) : null}
@@ -57,22 +61,19 @@ export default function TeamRoster() {
   const { teamName } = useParams()
   const navigate = useNavigate()
   const decoded = decodeURIComponent(teamName || '')
-  const { election, candidates, loading, loadActiveElection, loadCandidatesFor } =
+  const { election, candidates, loading, loadElections, loadCandidatesFor } =
     useElection()
+  const selectedId = election?._id ? String(election._id) : null
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const active = election || (await loadActiveElection())
-      if (cancelled || !active?._id) return
-      await loadCandidatesFor(active._id)
-    })()
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    loadElections()
+  }, [loadElections])
+
+  // The roster belongs to one race — refetch when the switcher moves.
+  useEffect(() => {
+    if (selectedId) loadCandidatesFor(selectedId)
+  }, [selectedId, loadCandidatesFor])
 
   const members = useMemo(() => {
     const q = query.trim().toLowerCase()

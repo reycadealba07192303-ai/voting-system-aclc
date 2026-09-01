@@ -24,7 +24,19 @@ const studentSchema = new mongoose.Schema(
     },
     // null = student has not created a password yet
     password_hash: { type: String, default: null },
+    /**
+     * True once the student has cast a ballot in at least one election.
+     * Kept for admin turnout views; the per-election gate is voted_elections.
+     */
     has_voted: { type: Boolean, default: false },
+    /**
+     * Elections this student has already cast a ballot in. A student may be in
+     * the audience of several at once (campus-wide + their program's
+     * representative race), so voting is claimed per election, not globally.
+     */
+    voted_elections: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Election' },
+    ],
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 )

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { ACLC_LOGO, BRAND } from '../../constants/branding'
 import { labelForLevel } from '../../constants/levels'
+import ElectionSwitcher from './ElectionSwitcher'
 import { useElection } from '../context/ElectionContext'
 import { useStudentAuth } from '../context/StudentAuthContext'
 import { initialsOf } from '../utils/name'
@@ -44,8 +45,8 @@ const TITLES = {
 }
 
 export default function StudentLayout() {
-  const { student, hasVoted, logout } = useStudentAuth()
-  const { election, isClosed } = useElection()
+  const { student, logout } = useStudentAuth()
+  const { election, elections, isClosed, pendingElections, loadElections } = useElection()
   const { pathname } = useLocation()
   const [drawer, setDrawer] = useState(false)
 
@@ -53,6 +54,11 @@ export default function StudentLayout() {
   useEffect(() => {
     setDrawer(false)
   }, [pathname])
+
+  // The shell owns the slate so the switcher is populated on every page.
+  useEffect(() => {
+    loadElections()
+  }, [loadElections])
 
   const isActive = (to) => pathname === to || pathname.startsWith(`${to}/`)
   const title =
@@ -98,8 +104,10 @@ export default function StudentLayout() {
                 >
                   <Icon size={17} strokeWidth={2} />
                   {label}
-                  {to === '/student/vote' && election && !isClosed && !hasVoted ? (
-                    <span className="sp-nav-badge">TO DO</span>
+                  {to === '/student/vote' && pendingElections.length ? (
+                    <span className="sp-nav-badge">
+                      {pendingElections.length > 1 ? pendingElections.length : 'TO DO'}
+                    </span>
                   ) : null}
                 </NavLink>
               ))}
@@ -153,21 +161,28 @@ export default function StudentLayout() {
           </div>
 
           <div className="sp-topbar-actions">
-            {election ? (
-              <span className={`sp-chip ${isClosed ? 'sp-chip-flat' : 'sp-chip-ok'}`}>
-                <i className={`sp-dot ${isClosed ? 'sp-dot-off' : ''}`} />
-                {isClosed ? 'Voting closed' : 'Voting open'}
-              </span>
-            ) : (
+            {elections.length === 0 ? (
               <span className="sp-chip sp-chip-flat">
                 <i className="sp-dot sp-dot-off" />
                 No active election
+              </span>
+            ) : pendingElections.length ? (
+              <span className="sp-chip sp-chip-ok">
+                <i className="sp-dot" />
+                {pendingElections.length} ballot
+                {pendingElections.length === 1 ? '' : 's'} to cast
+              </span>
+            ) : (
+              <span className={`sp-chip ${isClosed ? 'sp-chip-flat' : 'sp-chip-ok'}`}>
+                <i className={`sp-dot ${isClosed ? 'sp-dot-off' : ''}`} />
+                {election && !isClosed ? 'All ballots cast' : 'Voting closed'}
               </span>
             )}
           </div>
         </header>
 
         <main className="sp-page">
+          <ElectionSwitcher />
           <Outlet />
         </main>
       </div>
